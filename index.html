@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Quiz Library</title>
+    <title>My Quiz Library | Personal Study Manager</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -22,6 +22,10 @@
     </script>
     <style>
         body { font-family: system-ui, -apple-system, sans-serif; }
+        button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
+            outline: 2px solid #818cf8;
+            outline-offset: 2px;
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white flex flex-col justify-between">
@@ -42,6 +46,11 @@
                     <button id="modeStudyBtn" onclick="switchMainMode('study')" class="px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition cursor-pointer">⚡ 暗記モード</button>
                 </div>
 
+                <div class="flex items-center gap-2">
+                    <button id="exportBackupBtn" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition cursor-pointer">JSONバックアップ</button>
+                    <button id="importBackupBtn" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition cursor-pointer">バックアップ復元</button>
+                    <input type="file" id="backupFileInput" accept=".json,application/json" class="hidden">
+                </div>
                 <button id="openImportModalBtn" class="px-3.5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5 cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     問題を追加
@@ -115,8 +124,13 @@
 
             <!-- アクションバー -->
             <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 flex-wrap">
                     <span id="selectedCountText" class="text-slate-300 font-medium">選択中: 0件</span>
+                    <label class="flex items-center gap-1.5 text-slate-400 cursor-pointer">
+                        <input type="checkbox" id="hideAnswerToggle" checked
+                            class="rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                        解答を折りたたむ
+                    </label>
                     <button onclick="selectAllVisible()" class="text-indigo-400 hover:text-indigo-300 underline cursor-pointer">表示項目を全選択</button>
                     <button onclick="deselectAll()" class="text-slate-400 hover:text-slate-300 underline cursor-pointer">選択解除</button>
                 </div>
@@ -141,12 +155,16 @@
         <!-- ==================== 【画面B】暗記モードビュー ==================== -->
         <div id="studyView" class="hidden space-y-6">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative min-h-[420px] flex flex-col justify-between">
-                <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-6 text-xs text-slate-400">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-3 text-xs text-slate-400">
                     <div class="flex items-center gap-2">
                         <span id="studyProgress" class="font-bold text-indigo-400 text-sm">問題 1 / 1</span>
                         <span id="studySourceBadge" class="px-2 py-0.5 bg-slate-800 rounded text-slate-300">問題集名</span>
                     </div>
                     <button onclick="switchMainMode('library')" class="hover:text-slate-200 underline cursor-pointer">ライブラリに戻る</button>
+                </div>
+
+                <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden mb-5" aria-label="学習進捗">
+                    <div id="studyProgressBar" class="h-full bg-indigo-500 rounded-full transition-all duration-300" style="width: 0%"></div>
                 </div>
 
                 <div class="space-y-6 my-auto">
@@ -311,14 +329,42 @@
     <script>
         const AVAILABLE_GENRES = ["短文基本", "短文", "長文難問", "学生系", "ユニーク", "カルト", "早押し", "ペーパー", "敗者復活", "その他"];
         
-        let questions = JSON.parse(localStorage.getItem('quiz_questions')) || [];
-        let hideAnswer = JSON.parse(localStorage.getItem('quiz_hide_answer')) ?? true;
+        function loadQuestionsFromStorage() {
+            try {
+                const parsed = JSON.parse(localStorage.getItem('quiz_questions') || '[]');
+                if (!Array.isArray(parsed)) return [];
+                return parsed.filter(q => q && typeof q === 'object').map((q, index) => ({
+                    id: Number.isFinite(Number(q.id)) ? Number(q.id) : index + 1,
+                    source: String(q.source ?? 'マイ問題集'),
+                    genre: Array.isArray(q.genre) ? q.genre.map(String)
+                        : (q.genre ? String(q.genre).split(',').map(s => s.trim()).filter(Boolean) : []),
+                    question: String(q.question ?? ''),
+                    answer: String(q.answer ?? ''),
+                    memo: String(q.memo ?? '')
+                })).filter(q => q.question && q.answer);
+            } catch (error) {
+                console.error('問題データの読み込みに失敗しました:', error);
+                alert('保存データを読み込めませんでした。データが破損している可能性があります。');
+                return [];
+            }
+        }
+
+        let questions = loadQuestionsFromStorage();
+        let hideAnswer = true;
+        try {
+            const savedHideAnswer = localStorage.getItem('quiz_hide_answer');
+            hideAnswer = savedHideAnswer === null ? true : JSON.parse(savedHideAnswer) === true;
+        } catch {
+            hideAnswer = true;
+        }
         let viewMode = 'list';
         let currentPage = 1;
         let selectedIds = new Set();
         let pendingParsedQuestions = [];
+        const randomOrderCache = new Map();
 
         let studyQueue = [];
+        let studyOriginalQueue = [];
         let currentStudyIndex = 0;
         let studyStats = { again: 0, good: 0 };
 
@@ -335,11 +381,70 @@
         const hideAnswerToggle = document.getElementById('hideAnswerToggle');
         const selectedCountText = document.getElementById('selectedCountText');
 
-        hideAnswerToggle.checked = hideAnswer;
+        if (hideAnswerToggle) hideAnswerToggle.checked = hideAnswer;
 
         // モーダルを開くイベントを確実にバインド
         document.getElementById('openImportModalBtn').addEventListener('click', () => {
             openModal('import');
+        });
+
+        function exportBackup() {
+            const backup = { app: 'My Quiz Library', version: 1, exportedAt: new Date().toISOString(), questions };
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `My_Quiz_Library_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        function normalizeBackupRecord(item, index) {
+            if (!item || typeof item !== 'object') return null;
+            const question = String(item.question ?? '').trim();
+            const answer = String(item.answer ?? '').trim();
+            if (!question || !answer) return null;
+            return {
+                id: Number.isFinite(Number(item.id)) ? Number(item.id) : index + 1,
+                source: String(item.source ?? 'マイ問題集'),
+                genre: Array.isArray(item.genre) ? item.genre.map(String)
+                    : (item.genre ? String(item.genre).split(',').map(s => s.trim()) : []),
+                question, answer, memo: String(item.memo ?? '')
+            };
+        }
+
+        function restoreBackup(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = event => {
+                try {
+                    const parsed = JSON.parse(String(event.target.result || ''));
+                    const rows = Array.isArray(parsed) ? parsed : parsed.questions;
+                    if (!Array.isArray(rows)) throw new Error('questions配列がありません');
+                    const restored = rows.map(normalizeBackupRecord).filter(Boolean);
+                    if (!confirm(`${restored.length}件の問題を復元します。現在のデータは置き換えられます。続行しますか？`)) return;
+                    questions = restored;
+                    selectedIds.clear();
+                    saveToStorage();
+                    initGenres();
+                    renderQuestions();
+                    updateSelectedCount();
+                    alert('バックアップを復元しました。');
+                } catch (error) {
+                    console.error(error);
+                    alert('バックアップを読み込めませんでした。JSON形式とデータ内容を確認してください。');
+                }
+            };
+            reader.readAsText(file, 'utf-8');
+        }
+
+        document.getElementById('exportBackupBtn').addEventListener('click', exportBackup);
+        document.getElementById('importBackupBtn').addEventListener('click', () => document.getElementById('backupFileInput').click());
+        document.getElementById('backupFileInput').addEventListener('change', event => {
+            restoreBackup(event.target.files[0]);
+            event.target.value = '';
         });
 
         function initGenreCheckboxes(containerId, selectedList = []) {
@@ -364,7 +469,14 @@
         initGenreCheckboxes('manualGenreCheckboxes', ['短文基本']);
 
         function saveToStorage() {
-            localStorage.setItem('quiz_questions', JSON.stringify(questions));
+            try {
+                localStorage.setItem('quiz_questions', JSON.stringify(questions));
+                return true;
+            } catch (error) {
+                console.error('保存に失敗しました:', error);
+                alert('データを保存できませんでした。ブラウザの空き容量や設定を確認してください。');
+                return false;
+            }
         }
 
         window.resetAllData = function() {
@@ -443,7 +555,10 @@
             } else if (sortOrder === 'alphabetical') {
                 filtered.sort((a, b) => (a.question || '').localeCompare(b.question || '', 'ja'));
             } else if (sortOrder === 'random') {
-                filtered.sort(() => Math.random() - 0.5);
+                filtered.forEach(q => {
+                    if (!randomOrderCache.has(q.id)) randomOrderCache.set(q.id, Math.random());
+                });
+                filtered.sort((a, b) => randomOrderCache.get(a.id) - randomOrderCache.get(b.id));
             } else {
                 filtered.sort((a, b) => a.id - b.id);
             }
@@ -480,7 +595,8 @@
                 targets = questions.filter(q => selectedIds.has(q.id));
             }
 
-            studyQueue = [...targets].sort(() => Math.random() - 0.5);
+            studyOriginalQueue = [...targets].sort(() => Math.random() - 0.5);
+            studyQueue = [...studyOriginalQueue];
             currentStudyIndex = 0;
             studyStats = { again: 0, good: 0 };
 
@@ -503,8 +619,10 @@
             if (currentStudyIndex >= studyQueue.length) {
                 studyMainCard.classList.add('hidden');
                 completeBox.classList.remove('hidden');
-                document.getElementById('studyCompleteStats').textContent = 
-                    `学習完了: ${studyQueue.length}問中 「覚えた(Good)」${studyStats.good}問 / 「もう一度(Again)」${studyStats.again}問`;
+                const progressBar = document.getElementById('studyProgressBar');
+                if (progressBar) progressBar.style.width = '100%';
+                document.getElementById('studyCompleteStats').textContent =
+                    `対象 ${studyOriginalQueue.length}問 / Good ${studyStats.good}回 / Again ${studyStats.again}回`;
                 return;
             }
 
@@ -513,6 +631,11 @@
 
             const q = studyQueue[currentStudyIndex];
             progress.textContent = `問題 ${currentStudyIndex + 1} / ${studyQueue.length}`;
+            const progressBar = document.getElementById('studyProgressBar');
+            if (progressBar) {
+                const percent = studyQueue.length ? (currentStudyIndex / studyQueue.length) * 100 : 0;
+                progressBar.style.width = `${percent}%`;
+            }
             badge.textContent = q.source;
             qBox.textContent = q.question;
             
@@ -544,7 +667,15 @@
         };
 
         window.restartStudy = function() {
-            startStudyMode('selected');
+            if (!studyOriginalQueue.length) {
+                switchMainMode('library');
+                return;
+            }
+            studyQueue = [...studyOriginalQueue];
+            currentStudyIndex = 0;
+            studyStats = { again: 0, good: 0 };
+            switchMainMode('study');
+            renderStudyCard();
         };
 
         window.switchViewMode = function(mode) {
@@ -589,24 +720,21 @@
                 return;
             }
             const targetQuestions = questions.filter(q => selectedIds.has(q.id));
-            let csvContent = "";
-            targetQuestions.forEach(q => {
-                const front = q.question.replace(/[\t\n]/g, ' ');
-                const back = q.answer.replace(/[\t\n]/g, ' ');
-                const genreStr = Array.isArray(q.genre) ? q.genre.join(', ') : q.genre;
-                const extra = (q.memo ? q.memo + " " : "") + `[出典: ${q.source} / ジャンル: ${genreStr}]`.replace(/[\t\n]/g, ' ');
-                csvContent += `${front}\t${back}\t${extra}\n`;
+            const cleanField = value => String(value ?? '').replace(/[\t\r\n]/g, ' ').trim();
+            const rows = targetQuestions.map(q => {
+                const genres = Array.isArray(q.genre) ? q.genre.join(', ') : String(q.genre ?? '');
+                const extra = [q.memo, `[出典: ${q.source} / ジャンル: ${genres}]`].filter(Boolean).join(' ');
+                return [cleanField(q.question), cleanField(q.answer), cleanField(extra)].join('\t');
             });
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/tab-separated-values;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             a.download = `Anki_Export_${new Date().toISOString().slice(0, 10)}.txt`;
             document.body.appendChild(a);
             a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
         };
 
         function renderCard(q) {
@@ -737,11 +865,10 @@
             }
         }
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            const div = document.createElement('div');
-            div.innerHTML = str;
-            return div.textContent || div.innerText || '';
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            })[char]);
         }
 
         window.copyToClipboard = function(id) {
@@ -863,43 +990,85 @@
             alert('変更を保存しました！');
         };
 
-        function parseTextToQuestions(text) {
-            const lines = text.split('\n');
-            const batchSource = document.getElementById('defaultSourceInput').value.trim() || 'マイ問題集';
-            const batchGenres = getCheckedGenres('batchGenreCheckboxes');
-            let parsedList = [];
-
-            lines.forEach(line => {
-                if (!line.trim() || line.trim().startsWith('#')) return;
-
-                const separator = line.includes('\t') ? '\t' : ',';
-                const cols = line.split(separator).map(c => c.trim().replace(/^["']|["']$/g, ''));
-                
-                if (cols.length >= 2) {
-                    let source = batchSource;
-                    let genre = batchGenres;
-                    let question = "";
-                    let answer = "";
-                    let memo = "";
-
-                    if (cols.length >= 5) {
-                        source = cols[0] || batchSource;
-                        genre = cols[1] ? cols[1].split(',').map(s => s.trim()) : batchGenres;
-                        question = cols[2] || "";
-                        answer = cols[3] || "";
-                        memo = cols[4] || "";
+        function parseDelimitedLine(line, delimiter) {
+            const fields = [];
+            let value = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') {
+                    if (inQuotes && line[i + 1] === '"') {
+                        value += '"';
+                        i++;
                     } else {
-                        question = cols[0] || "";
-                        answer = cols[1] || "";
-                        memo = cols[2] || "";
+                        inQuotes = !inQuotes;
                     }
-
-                    if (question && answer) {
-                        parsedList.push({ source, genre, question, answer, memo });
-                    }
+                } else if (char === delimiter && !inQuotes) {
+                    fields.push(value.trim());
+                    value = '';
+                } else {
+                    value += char;
                 }
-            });
-            return parsedList;
+            }
+            fields.push(value.trim());
+            return fields;
+        }
+
+        function normalizeImportedQuestion(item, defaults) {
+            if (!item || typeof item !== 'object') return null;
+            const question = String(item.question ?? item.front ?? item.問題 ?? '').trim();
+            const answer = String(item.answer ?? item.back ?? item.解答 ?? '').trim();
+            if (!question || !answer) return null;
+
+            const rawGenre = item.genre ?? item.genres ?? item.ジャンル ?? defaults.genre;
+            const genre = Array.isArray(rawGenre)
+                ? rawGenre.map(v => String(v).trim()).filter(Boolean)
+                : String(rawGenre ?? '').split(/[;,、]/).map(v => v.trim()).filter(Boolean);
+
+            return {
+                source: String(item.source ?? item.deck ?? item.問題集 ?? defaults.source).trim() || defaults.source,
+                genre,
+                question,
+                answer,
+                memo: String(item.memo ?? item.note ?? item.extra ?? item.解説 ?? '').trim()
+            };
+        }
+
+        function parseTextToQuestions(rawText) {
+            const text = String(rawText ?? '').replace(/^\uFEFF/, '').trim();
+            if (!text) return [];
+            const defaults = {
+                source: document.getElementById('defaultSourceInput').value.trim() || 'マイ問題集',
+                genre: getCheckedGenres('batchGenreCheckboxes')
+            };
+
+            if (text.startsWith('[') || text.startsWith('{')) {
+                try {
+                    const parsed = JSON.parse(text);
+                    const rows = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.questions) ? parsed.questions : []);
+                    return rows.map(item => normalizeImportedQuestion(item, defaults)).filter(Boolean);
+                } catch (error) {
+                    console.warn('JSON解析に失敗したため、区切りテキストとして解析します。');
+                }
+            }
+
+            const lines = text.split(/\r?\n/).filter(line => line.trim() && !line.trim().startsWith('#'));
+            if (!lines.length) return [];
+            const delimiter = lines[0].includes('\t') ? '\t' : ',';
+
+            return lines.map(line => {
+                const cols = parseDelimitedLine(line, delimiter);
+                if (cols.length < 2) return null;
+                if (cols.length >= 5) {
+                    return normalizeImportedQuestion({
+                        source: cols[0], genre: cols[1], question: cols[2],
+                        answer: cols[3], memo: cols.slice(4).join(delimiter)
+                    }, defaults);
+                }
+                return normalizeImportedQuestion({
+                    question: cols[0], answer: cols[1], memo: cols.slice(2).join(delimiter)
+                }, defaults);
+            }).filter(Boolean);
         }
 
         window.previewParsedText = function() {
@@ -979,11 +1148,17 @@
             reader.readAsArrayBuffer(file);
         });
 
-        hideAnswerToggle.addEventListener('change', (e) => {
-            hideAnswer = e.target.checked;
-            localStorage.setItem('quiz_hide_answer', JSON.stringify(hideAnswer));
-            renderQuestions();
-        });
+        if (hideAnswerToggle) {
+            hideAnswerToggle.addEventListener('change', (e) => {
+                hideAnswer = e.target.checked;
+                try {
+                    localStorage.setItem('quiz_hide_answer', JSON.stringify(hideAnswer));
+                } catch (error) {
+                    console.warn('表示設定を保存できませんでした:', error);
+                }
+                renderQuestions();
+            });
+        }
 
         searchInput.addEventListener('input', () => { currentPage = 1; renderQuestions(); });
         searchModeSelect.addEventListener('change', () => { currentPage = 1; renderQuestions(); });
