@@ -12,47 +12,54 @@
             theme: {
                 extend: {
                     colors: {
-                        darkbg: '#0f172a',
-                        cardbg: '#1e293b',
-                        bordercolor: '#334155'
+                        darkbg: '#090d16',
+                        cardbg: '#131c31',
+                        bordercolor: '#1e293b'
                     }
                 }
             }
         }
     </script>
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; }
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
-            outline: 2px solid #818cf8;
+            outline: 2px solid #6366f1;
             outline-offset: 2px;
         }
+        /* スムーズスクロールとカスタムスクロールバー */
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #090d16; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white flex flex-col justify-between">
+<body class="bg-[#090d16] text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white flex flex-col justify-between antialiased">
 
     <div class="max-w-4xl mx-auto px-4 py-8 w-full">
         <!-- ヘッダー -->
-        <header class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-slate-800 pb-5">
-            <div>
-                <h1 class="text-2xl font-bold tracking-tight text-slate-100 flex items-center gap-2">
-                    <span class="text-indigo-400">📚</span> My Quiz Library
+        <header class="mb-8 flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-slate-800/80 pb-6">
+            <div class="space-y-1">
+                <h1 class="text-2xl font-black tracking-tight text-slate-100 flex items-center gap-2.5">
+                    <span class="p-2 bg-indigo-600/20 border border-indigo-500/30 rounded-xl text-indigo-400 text-lg shadow-inner">📚</span> 
+                    <span class="bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">My Quiz Library</span>
                 </h1>
-                <p class="text-slate-400 text-xs mt-1">検索・管理から暗記トレーニングまでが1つになったクイズプラットフォーム</p>
+                <p class="text-slate-400 text-xs pl-0.5">検索・管理から暗記トレーニングまでが1つになったクイズプラットフォーム</p>
             </div>
             <div class="flex items-center gap-3 flex-wrap justify-end">
                 <!-- メインモード切り替え（ライブラリ ⇄ 暗記モード） -->
-                <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
-                    <button id="modeLibraryBtn" onclick="switchMainMode('library')" class="px-3.5 py-2 rounded-lg font-bold bg-indigo-600 text-white transition cursor-pointer">📚 ライブラリ</button>
-                    <button id="modeStudyBtn" onclick="switchMainMode('study')" class="px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition cursor-pointer">⚡ 暗記モード</button>
+                <div class="flex bg-slate-900/90 p-1 rounded-xl border border-slate-800/80 shadow-sm text-xs backdrop-blur-md">
+                    <button id="modeLibraryBtn" onclick="switchMainMode('library')" class="px-3.5 py-2 rounded-lg font-bold bg-indigo-600 text-white shadow-md shadow-indigo-600/20 transition-all cursor-pointer">📚 ライブラリ</button>
+                    <button id="modeStudyBtn" onclick="switchMainMode('study')" class="px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer">⚡ 暗記モード</button>
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <button id="exportBackupBtn" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition cursor-pointer">JSONバックアップ</button>
-                    <button id="importBackupBtn" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition cursor-pointer">バックアップ復元</button>
+                    <button id="exportBackupBtn" title="JSONバックアップ" class="px-3 py-2.5 bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold rounded-xl border border-slate-800 transition-all shadow-sm cursor-pointer">JSON保存</button>
+                    <button id="importBackupBtn" title="バックアップ復元" class="px-3 py-2.5 bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold rounded-xl border border-slate-800 transition-all shadow-sm cursor-pointer">JSON復元</button>
                     <input type="file" id="backupFileInput" accept=".json,application/json" class="hidden">
                 </div>
-                <button id="openImportModalBtn" class="px-3.5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5 cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <button id="openImportModalBtn" class="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-600/25 transition-all flex items-center gap-2 cursor-pointer active:scale-95">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                     問題を追加
                 </button>
             </div>
@@ -61,19 +68,19 @@
         <!-- ==================== 【画面A】ライブラリビュー ==================== -->
         <div id="libraryView" class="space-y-4">
             <!-- 検索セクション -->
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 sticky top-4 z-10 backdrop-blur bg-slate-900/90 shadow-lg space-y-3">
-                <div class="flex flex-col sm:flex-row justify-between items-center gap-3 border-b border-slate-800 pb-3">
-                    <div class="flex bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs w-full sm:w-auto">
-                        <button id="viewModeList" onclick="switchViewMode('list')" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-md font-medium transition cursor-pointer bg-indigo-600 text-white">📜 一覧表示</button>
-                        <button id="viewModeGroupSource" onclick="switchViewMode('groupSource')" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-md font-medium transition cursor-pointer text-slate-400 hover:text-slate-200">📚 問題集ごと</button>
-                        <button id="viewModeGroupGenre" onclick="switchViewMode('groupGenre')" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-md font-medium transition cursor-pointer text-slate-400 hover:text-slate-200">🏷️ ジャンルごと</button>
+            <div class="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-4 sm:p-5 sticky top-4 z-10 backdrop-blur-xl shadow-xl shadow-black/20 space-y-3.5">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-3 border-b border-slate-800/60 pb-3">
+                    <div class="flex bg-slate-950/80 p-1 rounded-xl border border-slate-800/80 text-xs w-full sm:w-auto shadow-inner">
+                        <button id="viewModeList" onclick="switchViewMode('list')" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer bg-indigo-600 text-white shadow-sm">📜 一覧表示</button>
+                        <button id="viewModeGroupSource" onclick="switchViewMode('groupSource')" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer text-slate-400 hover:text-slate-200">📚 問題集ごと</button>
+                        <button id="viewModeGroupGenre" onclick="switchViewMode('groupGenre')" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer text-slate-400 hover:text-slate-200">🏷️ ジャンルごと</button>
                     </div>
-                    <span id="resultCount" class="text-xs text-slate-400">全 0 件中 0 件ヒット</span>
+                    <span id="resultCount" class="text-xs font-medium text-indigo-300/80 bg-indigo-950/40 px-3 py-1 rounded-full border border-indigo-900/30">全 0 件中 0 件ヒット</span>
                 </div>
 
                 <div class="flex flex-col md:flex-row gap-3">
-                    <div class="w-full md:w-36">
-                        <select id="searchModeSelect" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs text-slate-300 cursor-pointer">
+                    <div class="w-full md:w-38">
+                        <select id="searchModeSelect" class="w-full px-3 py-2.5 bg-slate-950/90 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-xs text-slate-200 cursor-pointer shadow-inner">
                             <option value="partial">🔍 部分一致</option>
                             <option value="exact">🎯 完全一致</option>
                             <option value="prefix">🚀 文頭一致</option>
@@ -83,63 +90,70 @@
                     </div>
 
                     <div class="relative flex-grow">
-                        <input type="text" id="searchInput" placeholder="検索キーワードを入力..." 
-                            class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm text-slate-100 placeholder-slate-500 transition">
-                        <svg class="absolute left-3 top-3.5 h-4 w-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <input type="text" id="searchInput" placeholder="検索キーワードを入力 (例: 疾患, 機構, 組織...)" 
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-950/90 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-sm text-slate-100 placeholder-slate-500 transition-all shadow-inner">
+                        <svg class="absolute left-3.5 top-3.5 h-4 w-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </div>
 
-                    <div class="w-full md:w-36">
-                        <select id="genreFilter" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs text-slate-300 cursor-pointer">
+                    <div class="w-full md:w-38">
+                        <select id="genreFilter" class="w-full px-3 py-2.5 bg-slate-950/90 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-xs text-slate-200 cursor-pointer shadow-inner">
                             <option value="">すべてのジャンル</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800 text-xs">
-                    <div class="flex items-center gap-2">
-                        <span class="text-slate-400">並び順:</span>
-                        <select id="sortOrderSelect" class="px-2.5 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
-                            <option value="default">登録順 (デフォルト)</option>
-                            <option value="source">問題集順</option>
-                            <option value="alphabetical">五十音順 (問題文)</option>
-                            <option value="random">🔀 ランダム</option>
-                        </select>
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800/60 text-xs">
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-slate-400">並び順:</span>
+                            <select id="sortOrderSelect" class="px-3 py-1.5 bg-slate-950/90 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
+                                <option value="default">登録順 (デフォルト)</option>
+                                <option value="source">問題集順</option>
+                                <option value="alphabetical">五十音順 (問題文)</option>
+                                <option value="random">🔀 ランダム</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="flex items-center gap-2">
-                        <span class="text-slate-400">表示件数:</span>
-                        <select id="pageSizeSelect" class="px-2.5 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
-                            <option value="10">10件</option>
-                            <option value="25" selected>25件</option>
-                            <option value="100">100件</option>
-                            <option value="500">500件</option>
-                            <option value="all">すべて</option>
-                        </select>
-                        <button id="clearBtn" class="hover:text-indigo-400 transition underline cursor-pointer ml-2">検索条件クリア</button>
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-slate-400">表示件数:</span>
+                            <select id="pageSizeSelect" class="px-3 py-1.5 bg-slate-950/90 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
+                                <option value="10">10件</option>
+                                <option value="25" selected>25件</option>
+                                <option value="100">100件</option>
+                                <option value="500">500件</option>
+                                <option value="all">すべて</option>
+                            </select>
+                        </div>
+                        <button id="clearBtn" class="text-slate-400 hover:text-indigo-400 transition-colors underline cursor-pointer ml-1">条件クリア</button>
                     </div>
                 </div>
             </div>
 
             <!-- アクションバー -->
-            <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div class="flex items-center gap-3 flex-wrap">
-                    <span id="selectedCountText" class="text-slate-300 font-medium">選択中: 0件</span>
-                    <label class="flex items-center gap-1.5 text-slate-400 cursor-pointer">
+            <div class="bg-slate-900/50 border border-slate-800/60 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs shadow-sm">
+                <div class="flex items-center gap-4 flex-wrap">
+                    <span id="selectedCountText" class="px-2.5 py-1 bg-indigo-600/10 border border-indigo-500/20 text-indigo-300 font-semibold rounded-lg">選択中: 0件</span>
+                    <label class="flex items-center gap-2 text-slate-300 cursor-pointer select-none">
                         <input type="checkbox" id="hideAnswerToggle" checked
-                            class="rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-900 cursor-pointer">
                         解答を折りたたむ
                     </label>
-                    <button onclick="selectAllVisible()" class="text-indigo-400 hover:text-indigo-300 underline cursor-pointer">表示項目を全選択</button>
-                    <button onclick="deselectAll()" class="text-slate-400 hover:text-slate-300 underline cursor-pointer">選択解除</button>
+                    <div class="flex items-center gap-2 text-indigo-400">
+                        <button onclick="selectAllVisible()" class="hover:text-indigo-300 transition-colors underline cursor-pointer">表示中を全選択</button>
+                        <span class="text-slate-600">/</span>
+                        <button onclick="deselectAll()" class="text-slate-400 hover:text-slate-200 transition-colors underline cursor-pointer">選択解除</button>
+                    </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="startStudyMode('selected')" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg shadow transition flex items-center gap-1.5 cursor-pointer">
+                    <button onclick="startStudyMode('selected')" class="px-3.5 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 font-semibold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                        選択した問題で暗記モードを開始
+                        選択問題で暗記モード
                     </button>
-                    <button onclick="exportSelectedToAnkiCsv()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-lg border border-slate-700 transition cursor-pointer">
+                    <button onclick="exportSelectedToAnkiCsv()" class="px-3.5 py-2 bg-slate-800/80 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl border border-slate-700/80 transition-all cursor-pointer shadow-sm">
                         Anki用TXT出力
                     </button>
                 </div>
@@ -149,179 +163,185 @@
             <div id="mainDisplayArea" class="space-y-4"></div>
 
             <!-- ページネーション -->
-            <div id="paginationArea" class="mt-6 flex items-center justify-center gap-2 text-xs"></div>
+            <div id="paginationArea" class="mt-8 flex items-center justify-center gap-2 text-xs"></div>
         </div>
 
         <!-- ==================== 【画面B】暗記モードビュー ==================== -->
         <div id="studyView" class="hidden space-y-6">
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative min-h-[420px] flex flex-col justify-between">
-                <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-3 text-xs text-slate-400">
-                    <div class="flex items-center gap-2">
-                        <span id="studyProgress" class="font-bold text-indigo-400 text-sm">問題 1 / 1</span>
-                        <span id="studySourceBadge" class="px-2 py-0.5 bg-slate-800 rounded text-slate-300">問題集名</span>
+            <div class="bg-gradient-to-b from-slate-900 to-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative min-h-[460px] flex flex-col justify-between backdrop-blur-xl">
+                <div class="flex justify-between items-center border-b border-slate-800/80 pb-4 mb-4 text-xs text-slate-400">
+                    <div class="flex items-center gap-3">
+                        <span id="studyProgress" class="font-bold text-indigo-400 text-sm px-3 py-1 bg-indigo-950/60 border border-indigo-800/40 rounded-xl">問題 1 / 1</span>
+                        <span id="studySourceBadge" class="px-2.5 py-1 bg-slate-800/80 border border-slate-700/50 rounded-lg text-slate-300 font-medium">問題集名</span>
                     </div>
-                    <button onclick="switchMainMode('library')" class="hover:text-slate-200 underline cursor-pointer">ライブラリに戻る</button>
+                    <button onclick="switchMainMode('library')" class="text-slate-400 hover:text-slate-200 transition-colors underline cursor-pointer">ライブラリに戻る</button>
                 </div>
 
-                <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden mb-5" aria-label="学習進捗">
-                    <div id="studyProgressBar" class="h-full bg-indigo-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+                <div class="h-2 bg-slate-950 rounded-full overflow-hidden mb-6 border border-slate-800/80 shadow-inner" aria-label="学習進捗">
+                    <div id="studyProgressBar" class="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-300" style="width: 0%"></div>
                 </div>
 
                 <div class="space-y-6 my-auto">
-                    <div id="studyQuestionText" class="text-xl font-bold text-slate-100 leading-relaxed text-center py-4">
+                    <div id="studyQuestionText" class="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed text-center py-6 px-4">
                         ここに問題文が表示されます
                     </div>
 
-                    <div id="studyAnswerBox" class="hidden p-4 bg-slate-950 rounded-xl border border-slate-800 text-center space-y-2">
-                        <span class="text-[10px] text-slate-500 uppercase tracking-widest block">Answer</span>
-                        <div id="studyAnswerText" class="text-lg font-bold text-indigo-300"></div>
-                        <div id="studyMemoText" class="text-xs text-slate-400 pt-2 border-t border-slate-900"></div>
+                    <div id="studyAnswerBox" class="hidden p-5 bg-slate-950/90 rounded-2xl border border-slate-800/90 text-center space-y-3 shadow-inner">
+                        <span class="text-[10px] text-indigo-400/80 font-bold uppercase tracking-widest block">Answer</span>
+                        <div id="studyAnswerText" class="text-lg sm:text-xl font-bold text-indigo-200"></div>
+                        <div id="studyMemoText" class="text-xs text-slate-400 pt-3 border-t border-slate-900/80 leading-relaxed"></div>
                     </div>
                 </div>
 
-                <div class="pt-6 border-t border-slate-800 mt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <button id="showAnswerBtn" onclick="revealStudyAnswer()" class="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl transition cursor-pointer shadow-lg">
+                <div class="pt-6 border-t border-slate-800/80 mt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <button id="showAnswerBtn" onclick="revealStudyAnswer()" class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-sm rounded-2xl transition-all cursor-pointer shadow-lg shadow-indigo-600/30 active:scale-95">
                         解答を見る
                     </button>
 
-                    <div id="studyRatingButtons" class="hidden w-full sm:w-auto flex items-center gap-2">
-                        <button onclick="rateCard('again')" class="flex-1 sm:flex-none px-5 py-3 bg-rose-600/80 hover:bg-rose-600 text-white text-xs font-bold rounded-xl transition cursor-pointer">
+                    <div id="studyRatingButtons" class="hidden w-full sm:w-auto flex items-center gap-3">
+                        <button onclick="rateCard('again')" class="flex-1 sm:flex-none px-6 py-3.5 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-bold rounded-2xl transition-all cursor-pointer shadow-sm">
                             ❌ もう一度 (Again)
                         </button>
-                        <button onclick="rateCard('good')" class="flex-1 sm:flex-none px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition cursor-pointer">
+                        <button onclick="rateCard('good')" class="flex-1 sm:flex-none px-7 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-2xl transition-all cursor-pointer shadow-lg shadow-emerald-600/20">
                             ⭕ 覚えた (Good)
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div id="studyCompleteBox" class="hidden text-center py-16 bg-slate-900 border border-slate-800 rounded-2xl shadow-xl space-y-4">
-                <div class="text-4xl">🎉</div>
-                <h2 class="text-xl font-bold text-slate-100">今回の暗記セッションが終了しました！</h2>
-                <p class="text-xs text-slate-400" id="studyCompleteStats">お疲れ様でした。</p>
+            <div id="studyCompleteBox" class="hidden text-center py-16 bg-slate-900/90 border border-slate-800 rounded-3xl shadow-2xl space-y-5 backdrop-blur-xl">
+                <div class="w-16 h-16 bg-indigo-600/20 border border-indigo-500/30 rounded-3xl mx-auto flex items-center justify-center text-3xl shadow-inner">🎉</div>
+                <div class="space-y-1">
+                    <h2 class="text-xl font-black text-slate-100">今回の暗記セッションが終了しました！</h2>
+                    <p class="text-xs text-slate-400" id="studyCompleteStats">お疲れ様でした。</p>
+                </div>
                 <div class="pt-4 flex justify-center gap-3">
-                    <button onclick="restartStudy()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition cursor-pointer">もう一度やり直す</button>
-                    <button onclick="switchMainMode('library')" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition cursor-pointer">ライブラリに戻る</button>
+                    <button onclick="restartStudy()" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-lg shadow-indigo-600/25">もう一度やり直す</button>
+                    <button onclick="switchMainMode('library')" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700/80 transition-all cursor-pointer">ライブラリに戻る</button>
                 </div>
             </div>
         </div>
 
         <!-- 空状態 -->
-        <div id="emptyState" class="hidden text-center py-16 bg-slate-900 border border-slate-800 rounded-xl mt-4">
-            <p class="text-slate-500 text-sm">条件に一致する問題が見つかりませんでした。「問題を追加」からデータを登録してください。</p>
+        <div id="emptyState" class="hidden text-center py-20 bg-slate-900/50 border border-slate-800/80 rounded-2xl mt-4 backdrop-blur-md">
+            <div class="text-3xl mb-2 text-slate-600">📭</div>
+            <p class="text-slate-400 text-sm font-medium">条件に一致する問題が見つかりませんでした。</p>
+            <p class="text-slate-500 text-xs mt-1">「問題を追加」からデータを新規登録してください。</p>
         </div>
     </div>
 
     <!-- フッター -->
-    <footer class="max-w-4xl mx-auto px-4 py-8 w-full text-center border-t border-slate-900 mt-16 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-600 gap-2">
-        <span>My Quiz Library — Personal Edition</span>
-        <button onclick="resetAllData()" class="hover:text-rose-400 transition underline cursor-pointer">【試験運用中】全データをリセット</button>
+    <footer class="max-w-4xl mx-auto px-4 py-8 w-full text-center border-t border-slate-900 mt-16 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
+        <span class="font-medium">My Quiz Library — Personal Edition</span>
+        <button onclick="resetAllData()" class="text-slate-500 hover:text-rose-400 transition-colors underline cursor-pointer">【試験運用中】全データをリセット</button>
     </footer>
 
     <!-- インポート・追加モーダル -->
-    <div id="importModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <h2 class="text-lg font-bold text-slate-100 mb-2">問題の追加</h2>
-            <p class="text-xs text-slate-400 mb-4">1問ずつ手動で追加するか、テキストやCSVファイルでまとめて追加できます。</p>
-
-            <div class="flex bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs mb-4">
-                <button onclick="switchImportTab('manual')" id="tabManualBtn" class="flex-1 py-1.5 rounded-md font-medium bg-indigo-600 text-white transition cursor-pointer">✏️ 1問ずつ追加</button>
-                <button onclick="switchImportTab('file')" id="tabFileBtn" class="flex-1 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 transition cursor-pointer">📁 ファイル・テキスト一括</button>
+    <div id="importModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden animate-in fade-in duration-200">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <div class="mb-5">
+                <h2 class="text-lg font-black text-slate-100 mb-1">問題の追加</h2>
+                <p class="text-xs text-slate-400">1問ずつ手動で追加するか、テキストやCSVファイルでまとめて追加できます。</p>
             </div>
 
-            <div id="batchSettingsBox" class="space-y-3 mb-4 p-3 bg-slate-950 rounded-xl border border-slate-800 hidden">
+            <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs mb-5 shadow-inner">
+                <button onclick="switchImportTab('manual')" id="tabManualBtn" class="flex-1 py-2 rounded-lg font-bold bg-indigo-600 text-white shadow-sm transition-all cursor-pointer">✏️ 1問ずつ追加</button>
+                <button onclick="switchImportTab('file')" id="tabFileBtn" class="flex-1 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer">📁 ファイル・一括</button>
+            </div>
+
+            <div id="batchSettingsBox" class="space-y-3.5 mb-5 p-4 bg-slate-950/90 rounded-2xl border border-slate-800/80 hidden">
                 <div>
-                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">📚 問題集名 (一括用デフォルト)</label>
-                    <input type="text" id="defaultSourceInput" value="マイ問題集" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                    <label class="block text-[11px] font-bold text-slate-300 mb-1.5">📚 問題集名 (一括用デフォルト)</label>
+                    <input type="text" id="defaultSourceInput" value="マイ問題集" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">🏷️ ジャンル複数選択 (一括用デフォルト)</label>
-                    <div id="batchGenreCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1 text-xs text-slate-300"></div>
+                    <label class="block text-[11px] font-bold text-slate-300 mb-1.5">🏷️ ジャンル複数選択 (一括用デフォルト)</label>
+                    <div id="batchGenreCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 mt-1 text-xs text-slate-300 p-2.5 bg-slate-900/60 rounded-xl border border-slate-800/80"></div>
                 </div>
             </div>
 
             <!-- タブ1: 手動追加 -->
-            <div id="tabManualContent" class="space-y-3">
+            <div id="tabManualContent" class="space-y-4">
                 <div>
-                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">📚 問題集名</label>
-                    <input type="text" id="manualSource" value="マイ問題集" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                    <label class="block text-[11px] font-bold text-slate-300 mb-1.5">📚 問題集名</label>
+                    <input type="text" id="manualSource" value="マイ問題集" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">🏷️ ジャンル (複数選択)</label>
-                    <div id="manualGenreCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1 text-xs text-slate-300 p-2 bg-slate-950 rounded-lg border border-slate-800"></div>
+                    <label class="block text-[11px] font-bold text-slate-300 mb-1.5">🏷️ ジャンル (複数選択)</label>
+                    <div id="manualGenreCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 mt-1 text-xs text-slate-300 p-3 bg-slate-950 rounded-xl border border-slate-800"></div>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">❓ 問題文</label>
-                    <textarea id="manualQuestion" rows="2" placeholder="問題文を入力..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"></textarea>
+                    <label class="block text-[11px] font-bold text-slate-300 mb-1.5">❓ 問題文</label>
+                    <textarea id="manualQuestion" rows="2.5" placeholder="問題文を入力..." class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"></textarea>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">🎯 解答</label>
-                    <input type="text" id="manualAnswer" placeholder="解答を入力..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                    <label class="block text-[11px] font-bold text-slate-300 mb-1.5">🎯 解答</label>
+                    <input type="text" id="manualAnswer" placeholder="解答を入力..." class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-semibold text-slate-300 mb-1">📝 メモ / 解説 (別枠)</label>
-                    <textarea id="manualMemo" rows="2" placeholder="解説やメモを入力..." class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"></textarea>
+                    <label class="block text-[11px] font-bold text-slate-300 mb-1.5">📝 メモ / 解説 (別枠)</label>
+                    <textarea id="manualMemo" rows="2" placeholder="解説やメモを入力..." class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"></textarea>
                 </div>
-                <button onclick="addSingleQuestion()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg text-xs transition cursor-pointer mt-2">この問題を追加する</button>
+                <button onclick="addSingleQuestion()" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold rounded-xl text-xs transition-all cursor-pointer shadow-lg shadow-indigo-600/25 mt-2 active:scale-95">この問題を追加する</button>
             </div>
 
             <!-- タブ2: 一括プレビュー -->
             <div id="tabFileContent" class="space-y-4 hidden">
-                <div class="p-4 bg-slate-950 rounded-xl border border-slate-800">
-                    <label class="block text-xs font-semibold text-slate-300 mb-2">📁 テキスト / CSV ファイルを選択</label>
-                    <input type="file" id="fileInput" accept=".csv,.txt,.json" class="block w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 file:cursor-pointer cursor-pointer">
+                <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                    <label class="block text-xs font-bold text-slate-300 mb-2">📁 テキスト / CSV ファイルを選択</label>
+                    <input type="file" id="fileInput" accept=".csv,.txt,.json" class="block w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 file:cursor-pointer cursor-pointer">
                 </div>
 
-                <div class="p-4 bg-slate-950 rounded-xl border border-slate-800">
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">📋 テキストを直接貼り付け (Anki形式 / TSV / CSV)</label>
-                    <textarea id="pasteArea" rows="4" placeholder="問題文 [Tab] 解答 [Tab] 解説(任意)" class="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"></textarea>
-                    <button onclick="previewParsedText()" class="mt-2 w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition cursor-pointer">プレビューを確認する</button>
+                <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5">📋 テキストを直接貼り付け (Anki形式 / TSV / CSV)</label>
+                    <textarea id="pasteArea" rows="4" placeholder="問題文 [Tab] 解答 [Tab] 解説(任意)" class="w-full p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"></textarea>
+                    <button onclick="previewParsedText()" class="mt-2.5 w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition-all cursor-pointer border border-slate-700/80">プレビューを確認する</button>
                 </div>
 
-                <div id="previewArea" class="hidden space-y-2 p-3 bg-slate-950 rounded-xl border border-slate-800 max-h-48 overflow-y-auto text-xs">
+                <div id="previewArea" class="hidden space-y-2.5 p-4 bg-slate-950 rounded-2xl border border-slate-800 max-h-48 overflow-y-auto text-xs">
                     <p class="font-bold text-indigo-400 mb-1">読み込みプレビュー (<span id="previewCount">0</span>件)</p>
-                    <div id="previewList" class="space-y-1.5 text-slate-300"></div>
+                    <div id="previewList" class="space-y-2 text-slate-300"></div>
                 </div>
 
-                <button id="commitImportBtn" onclick="commitBatchImport()" class="hidden w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg text-xs transition cursor-pointer">プレビューした問題群を登録する</button>
+                <button id="commitImportBtn" onclick="commitBatchImport()" class="hidden w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition-all cursor-pointer shadow-lg shadow-emerald-600/20 active:scale-95">プレビューした問題群を登録する</button>
             </div>
 
             <div class="mt-6 flex justify-end">
-                <button onclick="closeModal('import')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg transition cursor-pointer">閉じる</button>
+                <button onclick="closeModal('import')" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-all cursor-pointer border border-slate-700/80">閉じる</button>
             </div>
         </div>
     </div>
 
     <!-- 編集用モーダル -->
-    <div id="editModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <h2 class="text-lg font-bold text-slate-100 mb-3">問題の編集</h2>
+    <div id="editModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden animate-in fade-in duration-200">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <h2 class="text-lg font-black text-slate-100 mb-4">問題の編集</h2>
             <input type="hidden" id="editId">
-            <div class="space-y-3 text-xs">
+            <div class="space-y-3.5 text-xs">
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">📚 問題集名</label>
-                    <input type="text" id="editSource" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-100">
+                    <label class="block font-bold text-slate-300 mb-1.5">📚 問題集名</label>
+                    <input type="text" id="editSource" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">🏷️ ジャンル (複数選択)</label>
-                    <div id="editGenreCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-2 bg-slate-950 rounded-lg border border-slate-800"></div>
+                    <label class="block font-bold text-slate-300 mb-1.5">🏷️ ジャンル (複数選択)</label>
+                    <div id="editGenreCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 p-3 bg-slate-950 rounded-xl border border-slate-800"></div>
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">❓ 問題文</label>
-                    <textarea id="editQuestion" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-100"></textarea>
+                    <label class="block font-bold text-slate-300 mb-1.5">❓ 問題文</label>
+                    <textarea id="editQuestion" rows="3" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"></textarea>
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">🎯 解答</label>
-                    <input type="text" id="editAnswer" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-100">
+                    <label class="block font-bold text-slate-300 mb-1.5">🎯 解答</label>
+                    <input type="text" id="editAnswer" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">📝 メモ / 解説 (別枠)</label>
-                    <textarea id="editMemo" rows="2" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-100"></textarea>
+                    <label class="block font-bold text-slate-300 mb-1.5">📝 メモ / 解説 (別枠)</label>
+                    <textarea id="editMemo" rows="2.5" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"></textarea>
                 </div>
             </div>
-            <div class="mt-6 flex justify-end gap-2">
-                <button onclick="closeModal('edit')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-lg cursor-pointer">キャンセル</button>
-                <button onclick="saveEditedQuestion()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-lg cursor-pointer">変更を保存</button>
+            <div class="mt-6 flex justify-end gap-2.5">
+                <button onclick="closeModal('edit')" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-all cursor-pointer border border-slate-700/80">キャンセル</button>
+                <button onclick="saveEditedQuestion()" class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shadow-lg shadow-indigo-600/25">変更を保存</button>
             </div>
         </div>
     </div>
@@ -383,7 +403,6 @@
 
         if (hideAnswerToggle) hideAnswerToggle.checked = hideAnswer;
 
-        // モーダルを開くイベントを確実にバインド
         document.getElementById('openImportModalBtn').addEventListener('click', () => {
             openModal('import');
         });
@@ -451,7 +470,7 @@
             const container = document.getElementById(containerId);
             if (!container) return;
             container.innerHTML = AVAILABLE_GENRES.map(g => `
-                <label class="flex items-center gap-1.5 cursor-pointer hover:text-indigo-300">
+                <label class="flex items-center gap-2 cursor-pointer hover:text-indigo-300 transition-colors select-none">
                     <input type="checkbox" value="${g}" ${selectedList.includes(g) ? 'checked' : ''} class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
                     ${g}
                 </label>
@@ -575,13 +594,13 @@
             if (mode === 'library') {
                 libView.classList.remove('hidden');
                 studyView.classList.add('hidden');
-                libBtn.className = "px-3.5 py-2 rounded-lg font-bold bg-indigo-600 text-white transition cursor-pointer";
-                studyBtn.className = "px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition cursor-pointer";
+                libBtn.className = "px-3.5 py-2 rounded-lg font-bold bg-indigo-600 text-white shadow-md shadow-indigo-600/20 transition-all cursor-pointer";
+                studyBtn.className = "px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer";
             } else {
                 libView.classList.add('hidden');
                 studyView.classList.remove('hidden');
-                studyBtn.className = "px-3.5 py-2 rounded-lg font-bold bg-indigo-600 text-white transition cursor-pointer";
-                libBtn.className = "px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition cursor-pointer";
+                studyBtn.className = "px-3.5 py-2 rounded-lg font-bold bg-indigo-600 text-white shadow-md shadow-indigo-600/20 transition-all cursor-pointer";
+                libBtn.className = "px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer";
             }
         };
 
@@ -684,9 +703,9 @@
             ['list', 'groupSource', 'groupGenre'].forEach(m => {
                 const btn = document.getElementById(`viewMode${m.charAt(0).toUpperCase() + m.slice(1)}`);
                 if (m === mode) {
-                    btn.className = "flex-1 sm:flex-none px-3.5 py-1.5 rounded-md font-medium transition cursor-pointer bg-indigo-600 text-white";
+                    btn.className = "flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer bg-indigo-600 text-white shadow-sm";
                 } else {
-                    btn.className = "flex-1 sm:flex-none px-3.5 py-1.5 rounded-md font-medium transition cursor-pointer text-slate-400 hover:text-slate-200";
+                    btn.className = "flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer text-slate-400 hover:text-slate-200";
                 }
             });
             renderQuestions();
@@ -700,6 +719,8 @@
             if (selectedIds.has(id)) selectedIds.delete(id);
             else selectedIds.add(id);
             updateSelectedCount();
+            // カードのスタイル更新のため再描画
+            renderQuestions();
         };
 
         window.selectAllVisible = function() {
@@ -742,19 +763,19 @@
             const genresArr = Array.isArray(q.genre) ? q.genre : (q.genre ? q.genre.split(',').map(s => s.trim()) : ['未分類']);
             
             return `
-                <div class="bg-slate-900 border ${isChecked ? 'border-indigo-500/80 bg-slate-900/90' : 'border-slate-800'} rounded-xl p-5 hover:border-slate-700 transition shadow-sm mb-4">
+                <div class="bg-slate-900/90 border ${isChecked ? 'border-indigo-500 bg-slate-900 shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500/50' : 'border-slate-800/90 hover:border-slate-700'} rounded-2xl p-5 transition-all shadow-sm mb-4 group backdrop-blur-sm">
                     <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                        <div class="flex items-center gap-2 flex-wrap">
+                        <div class="flex items-center gap-2.5 flex-wrap">
                             <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelect(${q.id})" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
                             <div class="flex items-center gap-1.5 flex-wrap">
-                                ${genresArr.map(g => `<span class="px-2 py-0.5 bg-indigo-950 text-indigo-300 border border-indigo-900/50 text-[11px] font-semibold rounded-md">${escapeHtml(g)}</span>`).join('')}
+                                ${genresArr.map(g => `<span class="px-2.5 py-0.5 bg-indigo-950/80 text-indigo-300 border border-indigo-800/40 text-[11px] font-semibold rounded-lg shadow-inner">${escapeHtml(g)}</span>`).join('')}
                             </div>
                             <span class="text-xs text-slate-400 font-medium">/ ${escapeHtml(q.source)}</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="openEditModal(${q.id})" class="text-xs text-indigo-400 hover:text-indigo-300 cursor-pointer bg-slate-950 px-2.5 py-1 rounded-md border border-slate-800 transition">編集</button>
-                            <button onclick="copyToClipboard(${q.id})" class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 cursor-pointer bg-slate-950 px-2.5 py-1 rounded-md border border-slate-800 transition">コピー</button>
-                            <button onclick="deleteQuestion(${q.id})" class="text-xs text-rose-400 hover:text-rose-300 cursor-pointer bg-slate-950 px-2 py-1 rounded-md border border-slate-800 transition" title="削除">×</button>
+                        <div class="flex items-center gap-1.5 opacity-90 group-hover:opacity-100 transition-opacity">
+                            <button onclick="openEditModal(${q.id})" class="text-xs text-indigo-400 hover:text-indigo-300 cursor-pointer bg-slate-950 px-3 py-1 rounded-lg border border-slate-800 hover:border-indigo-500/30 transition-all">編集</button>
+                            <button onclick="copyToClipboard(${q.id})" class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 cursor-pointer bg-slate-950 px-3 py-1 rounded-lg border border-slate-800 hover:border-slate-700 transition-all">コピー</button>
+                            <button onclick="deleteQuestion(${q.id})" class="text-xs text-rose-400 hover:text-rose-300 cursor-pointer bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 hover:border-rose-500/30 transition-all" title="削除">×</button>
                         </div>
                     </div>
 
@@ -762,21 +783,21 @@
                         ${escapeHtml(q.question)}
                     </div>
 
-                    <div class="border-t border-slate-800 pt-3 space-y-2">
+                    <div class="border-t border-slate-800/80 pt-3 space-y-2">
                         ${hideAnswer ? `
-                            <details class="group">
-                                <summary class="text-sm font-semibold text-indigo-400 cursor-pointer select-none flex items-center gap-1.5 list-none">
-                                    <span class="group-open:rotate-90 transition-transform">▶</span> 解答を表示
+                            <details class="group/details">
+                                <summary class="text-xs font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer select-none flex items-center gap-1.5 list-none py-1">
+                                    <span class="group-open/details:rotate-90 transition-transform">▶</span> 解答を表示
                                 </summary>
-                                <div class="mt-2.5 p-3 bg-slate-950 rounded-lg text-sm text-slate-200 space-y-2 border border-slate-800/80">
-                                    <div><strong class="text-slate-500 text-[10px] uppercase tracking-wider block mb-0.5">Answer</strong> <span class="font-bold text-indigo-300">${escapeHtml(q.answer)}</span></div>
-                                    ${q.memo ? `<div class="pt-2 border-t border-slate-900"><strong class="text-slate-500 text-[10px] uppercase tracking-wider block mb-0.5">Memo / 解説</strong> <span class="text-slate-300 text-xs">${escapeHtml(q.memo)}</span></div>` : ''}
+                                <div class="mt-2.5 p-3.5 bg-slate-950 rounded-xl text-sm text-slate-200 space-y-2.5 border border-slate-800/80 shadow-inner">
+                                    <div><strong class="text-slate-500 text-[10px] uppercase tracking-wider block mb-0.5">Answer</strong> <span class="font-bold text-indigo-300 text-base">${escapeHtml(q.answer)}</span></div>
+                                    ${q.memo ? `<div class="pt-2 border-t border-slate-900"><strong class="text-slate-500 text-[10px] uppercase tracking-wider block mb-0.5">Memo / 解説</strong> <span class="text-slate-300 text-xs leading-relaxed">${escapeHtml(q.memo)}</span></div>` : ''}
                                 </div>
                             </details>
                         ` : `
-                            <div class="p-3 bg-slate-950 rounded-lg text-sm text-slate-200 space-y-2 border border-slate-800/80">
-                                <div><strong class="text-slate-500 text-[10px] uppercase tracking-wider block mb-0.5">Answer</strong> <span class="font-bold text-indigo-300">${escapeHtml(q.answer)}</span></div>
-                                ${q.memo ? `<div class="pt-2 border-t border-slate-900"><strong class="text-slate-500 text-[10px] uppercase tracking-wider block mb-0.5">Memo / 解説</strong> <span class="text-slate-300 text-xs">${escapeHtml(q.memo)}</span></div>` : ''}
+                            <div class="p-3.5 bg-slate-950 rounded-xl text-sm text-slate-200 space-y-2.5 border border-slate-800/80 shadow-inner">
+                                <div><strong class="text-slate-500 text-[10px] uppercase tracking-wider block mb-0.5">Answer</strong> <span class="font-bold text-indigo-300 text-base">${escapeHtml(q.answer)}</span></div>
+                                ${q.memo ? `<div class="pt-2 border-t border-slate-900"><strong class="text-slate-500 text-[10px] uppercase tracking-wider block mb-0.5">Memo / 解説</strong> <span class="text-slate-300 text-xs leading-relaxed">${escapeHtml(q.memo)}</span></div>` : ''}
                             </div>
                         `}
                     </div>
@@ -817,15 +838,15 @@
 
                     let paginationHtml = '';
                     if (totalPages > 1) {
-                        paginationHtml += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled class="px-3 py-1 bg-slate-900 border border-slate-800 rounded text-slate-600 cursor-not-allowed"' : 'class="px-3 py-1 bg-slate-900 border border-slate-800 rounded text-slate-300 hover:bg-slate-800 cursor-pointer"'}>前へ</button>`;
+                        paginationHtml += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-600 cursor-not-allowed"' : 'class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-300 hover:bg-slate-800 cursor-pointer transition-all"'}>前へ</button>`;
                         for (let i = 1; i <= totalPages; i++) {
                             if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
-                                paginationHtml += `<button onclick="changePage(${i})" class="px-3 py-1 rounded border ${i === currentPage ? 'bg-indigo-600 border-indigo-500 text-white font-bold' : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'} cursor-pointer">${i}</button>`;
+                                paginationHtml += `<button onclick="changePage(${i})" class="px-3.5 py-1.5 rounded-xl border ${i === currentPage ? 'bg-indigo-600 border-indigo-500 text-white font-bold shadow-md shadow-indigo-600/20' : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'} cursor-pointer transition-all">${i}</button>`;
                             } else if (i === currentPage - 3 || i === currentPage + 3) {
                                 paginationHtml += `<span class="px-2 text-slate-600">...</span>`;
                             }
                         }
-                        paginationHtml += `<button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled class="px-3 py-1 bg-slate-900 border border-slate-800 rounded text-slate-600 cursor-not-allowed"' : 'class="px-3 py-1 bg-slate-900 border border-slate-800 rounded text-slate-300 hover:bg-slate-800 cursor-pointer"'}>次へ</button>`;
+                        paginationHtml += `<button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-600 cursor-not-allowed"' : 'class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-300 hover:bg-slate-800 cursor-pointer transition-all"'}>次へ</button>`;
                     }
                     paginationArea.innerHTML = paginationHtml;
                 } else {
@@ -849,15 +870,15 @@
                 });
 
                 mainDisplayArea.innerHTML = Object.keys(groups).map(groupName => `
-                    <details open class="bg-slate-900 border border-slate-800 rounded-xl p-4 mb-4 shadow-sm group">
+                    <details open class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-5 mb-4 shadow-sm group backdrop-blur-sm">
                         <summary class="text-sm font-bold text-slate-200 cursor-pointer select-none flex items-center justify-between list-none py-1">
-                            <span class="flex items-center gap-2">
-                                <span class="group-open:rotate-95 transition-transform text-indigo-400">▶</span>
+                            <span class="flex items-center gap-2.5">
+                                <span class="group-open:rotate-90 transition-transform text-indigo-400">▶</span>
                                 ${escapeHtml(groupName)}
-                                <span class="text-xs px-2 py-0.5 bg-slate-800 text-slate-400 rounded-full font-normal">${groups[groupName].length}問</span>
+                                <span class="text-xs px-2.5 py-0.5 bg-slate-800 text-slate-400 rounded-full font-normal">${groups[groupName].length}問</span>
                             </span>
                         </summary>
-                        <div class="mt-4 pt-3 border-t border-slate-800/80 space-y-4">
+                        <div class="mt-4 pt-4 border-t border-slate-800/80 space-y-4">
                             ${groups[groupName].map(q => renderCard(q)).join('')}
                         </div>
                     </details>
@@ -892,7 +913,6 @@
             }
         };
 
-        // モーダル操作関数
         window.openModal = function(type) {
             if (type === 'import') document.getElementById('importModal').classList.remove('hidden');
         }
@@ -909,14 +929,14 @@
             const batchBox = document.getElementById('batchSettingsBox');
 
             if (tab === 'manual') {
-                manualBtn.className = "flex-1 py-1.5 rounded-md font-medium bg-indigo-600 text-white transition cursor-pointer";
-                fileBtn.className = "flex-1 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 transition cursor-pointer";
+                manualBtn.className = "flex-1 py-2 rounded-lg font-bold bg-indigo-600 text-white shadow-sm transition-all cursor-pointer";
+                fileBtn.className = "flex-1 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer";
                 manualContent.classList.remove('hidden');
                 fileContent.classList.add('hidden');
                 batchBox.classList.add('hidden');
             } else {
-                fileBtn.className = "flex-1 py-1.5 rounded-md font-medium bg-indigo-600 text-white transition cursor-pointer";
-                manualBtn.className = "flex-1 py-1.5 rounded-md font-medium text-slate-400 hover:text-slate-200 transition cursor-pointer";
+                fileBtn.className = "flex-1 py-2 rounded-lg font-bold bg-indigo-600 text-white shadow-sm transition-all cursor-pointer";
+                manualBtn.className = "flex-1 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer";
                 fileContent.classList.remove('hidden');
                 manualContent.classList.add('hidden');
                 batchBox.classList.remove('hidden');
@@ -1083,7 +1103,7 @@
             previewCount.textContent = pendingParsedQuestions.length;
             if (pendingParsedQuestions.length > 0) {
                 previewList.innerHTML = pendingParsedQuestions.map((p, idx) => `
-                    <div class="p-2 bg-slate-900 rounded border border-slate-800">
+                    <div class="p-2.5 bg-slate-900 rounded-xl border border-slate-800">
                         <span class="text-indigo-400 font-bold">[${idx + 1}]</span> <strong>Q:</strong> ${escapeHtml(p.question)} / <strong>A:</strong> ${escapeHtml(p.answer)}
                     </div>
                 `).join('');
