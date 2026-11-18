@@ -42,7 +42,7 @@
                     <button id="modeStudyBtn" onclick="switchMainMode('study')" class="px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition cursor-pointer">⚡ 暗記モード</button>
                 </div>
 
-                <button onclick="openModal('import')" class="px-3.5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                <button id="openImportModalBtn" class="px-3.5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5 cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     問題を追加
                 </button>
@@ -113,7 +113,7 @@
                 </div>
             </div>
 
-            <!-- アクションバー（暗記モードへの持ち出し） -->
+            <!-- アクションバー -->
             <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
                 <div class="flex items-center gap-3">
                     <span id="selectedCountText" class="text-slate-300 font-medium">選択中: 0件</span>
@@ -125,7 +125,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                         選択した問題で暗記モードを開始
                     </button>
-                    <button onclick="exportSelectedToAnkiCsv()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-lg border border-slate-700 transition cursor-pointer" title="Anki用タブ区切りテキスト書き出し">
+                    <button onclick="exportSelectedToAnkiCsv()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-lg border border-slate-700 transition cursor-pointer">
                         Anki用TXT出力
                     </button>
                 </div>
@@ -141,7 +141,6 @@
         <!-- ==================== 【画面B】暗記モードビュー ==================== -->
         <div id="studyView" class="hidden space-y-6">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative min-h-[420px] flex flex-col justify-between">
-                <!-- 上部ステータス -->
                 <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-6 text-xs text-slate-400">
                     <div class="flex items-center gap-2">
                         <span id="studyProgress" class="font-bold text-indigo-400 text-sm">問題 1 / 1</span>
@@ -150,13 +149,11 @@
                     <button onclick="switchMainMode('library')" class="hover:text-slate-200 underline cursor-pointer">ライブラリに戻る</button>
                 </div>
 
-                <!-- 問題カード中央 -->
                 <div class="space-y-6 my-auto">
                     <div id="studyQuestionText" class="text-xl font-bold text-slate-100 leading-relaxed text-center py-4">
                         ここに問題文が表示されます
                     </div>
 
-                    <!-- 解答エリア（ペングラム風タップ/クリック展開） -->
                     <div id="studyAnswerBox" class="hidden p-4 bg-slate-950 rounded-xl border border-slate-800 text-center space-y-2">
                         <span class="text-[10px] text-slate-500 uppercase tracking-widest block">Answer</span>
                         <div id="studyAnswerText" class="text-lg font-bold text-indigo-300"></div>
@@ -164,13 +161,11 @@
                     </div>
                 </div>
 
-                <!-- 下部アクションボタン -->
                 <div class="pt-6 border-t border-slate-800 mt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <button id="showAnswerBtn" onclick="revealStudyAnswer()" class="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl transition cursor-pointer shadow-lg">
                         解答を見る
                     </button>
 
-                    <!-- 解答表示後に現れる正誤判定ボタン群 -->
                     <div id="studyRatingButtons" class="hidden w-full sm:w-auto flex items-center gap-2">
                         <button onclick="rateCard('again')" class="flex-1 sm:flex-none px-5 py-3 bg-rose-600/80 hover:bg-rose-600 text-white text-xs font-bold rounded-xl transition cursor-pointer">
                             ❌ もう一度 (Again)
@@ -182,7 +177,6 @@
                 </div>
             </div>
 
-            <!-- セッション完了画面 -->
             <div id="studyCompleteBox" class="hidden text-center py-16 bg-slate-900 border border-slate-800 rounded-2xl shadow-xl space-y-4">
                 <div class="text-4xl">🎉</div>
                 <h2 class="text-xl font-bold text-slate-100">今回の暗記セッションが終了しました！</h2>
@@ -324,7 +318,6 @@
         let selectedIds = new Set();
         let pendingParsedQuestions = [];
 
-        // 暗記モード用のステート
         let studyQueue = [];
         let currentStudyIndex = 0;
         let studyStats = { again: 0, good: 0 };
@@ -344,8 +337,14 @@
 
         hideAnswerToggle.checked = hideAnswer;
 
+        // モーダルを開くイベントを確実にバインド
+        document.getElementById('openImportModalBtn').addEventListener('click', () => {
+            openModal('import');
+        });
+
         function initGenreCheckboxes(containerId, selectedList = []) {
             const container = document.getElementById(containerId);
+            if (!container) return;
             container.innerHTML = AVAILABLE_GENRES.map(g => `
                 <label class="flex items-center gap-1.5 cursor-pointer hover:text-indigo-300">
                     <input type="checkbox" value="${g}" ${selectedList.includes(g) ? 'checked' : ''} class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
@@ -356,6 +355,7 @@
 
         function getCheckedGenres(containerId) {
             const container = document.getElementById(containerId);
+            if (!container) return [];
             const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked');
             return Array.from(checkboxes).map(cb => cb.value);
         }
@@ -451,7 +451,6 @@
             return filtered;
         }
 
-        // ==================== メインモード切替 (ライブラリ ⇄ 暗記モード) ====================
         window.switchMainMode = function(mode) {
             const libView = document.getElementById('libraryView');
             const studyView = document.getElementById('studyView');
@@ -471,7 +470,6 @@
             }
         };
 
-        // 暗記モードの起動
         window.startStudyMode = function(type) {
             let targets = [];
             if (type === 'selected') {
@@ -482,7 +480,6 @@
                 targets = questions.filter(q => selectedIds.has(q.id));
             }
 
-            // ランダムにシャッフルしてキューにセット
             studyQueue = [...targets].sort(() => Math.random() - 0.5);
             currentStudyIndex = 0;
             studyStats = { again: 0, good: 0 };
@@ -504,7 +501,6 @@
             const studyMainCard = document.querySelector('#studyView > div');
 
             if (currentStudyIndex >= studyQueue.length) {
-                // セッション完了
                 studyMainCard.classList.add('hidden');
                 completeBox.classList.remove('hidden');
                 document.getElementById('studyCompleteStats').textContent = 
@@ -525,7 +521,6 @@
             if (q.memo) mText.classList.remove('hidden');
             else mText.classList.add('hidden');
 
-            // 初期状態は解答を隠す
             aBox.classList.add('hidden');
             showBtn.classList.remove('hidden');
             ratingBtns.classList.add('hidden');
@@ -540,7 +535,6 @@
         window.rateCard = function(rating) {
             if (rating === 'again') {
                 studyStats.again++;
-                // 間違えた問題はキューの末尾に再度追加して再復習できるようにする (ペングラム風)
                 studyQueue.push(studyQueue[currentStudyIndex]);
             } else {
                 studyStats.good++;
@@ -553,7 +547,6 @@
             startStudyMode('selected');
         };
 
-        // ==================== ライブラリのビュー操作 ====================
         window.switchViewMode = function(mode) {
             viewMode = mode;
             currentPage = 1;
@@ -772,7 +765,7 @@
             }
         };
 
-        // モーダル操作
+        // モーダル操作関数
         window.openModal = function(type) {
             if (type === 'import') document.getElementById('importModal').classList.remove('hidden');
         }
@@ -872,7 +865,7 @@
 
         function parseTextToQuestions(text) {
             const lines = text.split('\n');
-            const batchSource = defaultSourceInput.value.trim() || 'マイ問題集';
+            const batchSource = document.getElementById('defaultSourceInput').value.trim() || 'マイ問題集';
             const batchGenres = getCheckedGenres('batchGenreCheckboxes');
             let parsedList = [];
 
@@ -910,7 +903,7 @@
         }
 
         window.previewParsedText = function() {
-            const pasteText = pasteArea.value;
+            const pasteText = document.getElementById('pasteArea').value;
             pendingParsedQuestions = parseTextToQuestions(pasteText);
             
             const previewArea = document.getElementById('previewArea');
@@ -955,14 +948,14 @@
             renderQuestions();
             alert(`${pendingParsedQuestions.length}件の問題を追加登録しました！`);
             
-            pasteArea.value = '';
+            document.getElementById('pasteArea').value = '';
             document.getElementById('previewArea').classList.add('hidden');
             document.getElementById('commitImportBtn').classList.add('hidden');
             pendingParsedQuestions = [];
             closeModal('import');
         };
 
-        fileInput.addEventListener('change', (e) => {
+        document.getElementById('fileInput').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
@@ -979,8 +972,8 @@
                         text = new TextDecoder('utf-8').decode(buffer);
                     }
                 }
-                pasteArea.value = text;
-                fileInput.value = '';
+                document.getElementById('pasteArea').value = text;
+                document.getElementById('fileInput').value = '';
                 previewParsedText();
             };
             reader.readAsArrayBuffer(file);
