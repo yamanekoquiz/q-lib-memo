@@ -31,7 +31,6 @@
         ::-webkit-scrollbar-track { background: #070a13; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #334155; }
-        /* 大会風グローエフェクト */
         .tournament-glow {
             box-shadow: 0 0 25px rgba(99, 102, 241, 0.15), inset 0 0 15px rgba(99, 102, 241, 0.05);
         }
@@ -46,12 +45,11 @@
                 <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
                 SYSTEM ACTIVE // TOURNAMENT MODE
             </span>
-            <span class="text-slate-500">SEC-9 // LIBRARY & STAGE</span>
+            <span id="poolStatusHeader" class="text-slate-400">STUDY QUEUE: 0</span>
         </div>
 
         <!-- ヘッダー -->
         <header class="mb-8 flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-indigo-500/20 pb-6 relative">
-            <!-- 極細のネオンアクセントライン -->
             <div class="absolute -bottom-[1px] left-0 w-32 h-[2px] bg-gradient-to-r from-indigo-500 to-transparent"></div>
 
             <div class="space-y-1">
@@ -59,12 +57,15 @@
                     <span class="p-2 bg-indigo-600/20 border border-indigo-500/40 rounded-xl text-indigo-400 text-lg shadow-inner">⚡</span> 
                     <span class="bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">My Quiz Library</span>
                 </h1>
-                <p class="text-slate-400 text-xs pl-0.5">検索・管理から暗記トレーニングまでが1つになったクイズプラットフォーム</p>
+                <p class="text-slate-400 text-xs pl-0.5">検索・管理から習得判定付きの暗記トレーニングまでが1つになったプラットフォーム</p>
             </div>
             <div class="flex items-center gap-3 flex-wrap justify-end">
                 <div class="flex bg-slate-900/90 p-1 rounded-xl border border-slate-800 shadow-sm text-xs backdrop-blur-md">
                     <button id="modeLibraryBtn" onclick="switchMainMode('library')" class="px-3.5 py-2 rounded-lg font-bold bg-indigo-600 text-white shadow-md shadow-indigo-600/25 transition-all cursor-pointer">📚 ライブラリ</button>
-                    <button id="modeStudyBtn" onclick="switchMainMode('study')" class="px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer">⚡ 暗記モード</button>
+                    <button id="modeStudyBtn" onclick="switchMainMode('study')" class="px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5">
+                        ⚡ 暗記モード
+                        <span id="navQueueBadge" class="px-1.5 py-0.2 bg-indigo-950 text-indigo-300 border border-indigo-700/50 rounded-md font-mono text-[10px]">0</span>
+                    </button>
                 </div>
 
                 <div class="flex items-center gap-2">
@@ -93,11 +94,14 @@
                 </div>
 
                 <div class="flex flex-col md:flex-row gap-3">
-                    <div class="w-full md:w-38">
+                    <div class="w-full md:w-44">
                         <select id="searchModeSelect" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-xs text-slate-200 cursor-pointer shadow-inner">
-                            <option value="partial">🔍 部分一致</option>
-                            <option value="exact">🎯 完全一致</option>
-                            <option value="prefix">🚀 文頭一致</option>
+                            <option value="all_fields">🌐 一括検索 (すべて)</option>
+                            <option value="question_only">❓ 問題文のみ検索</option>
+                            <option value="answer_only">🎯 解答のみ検索</option>
+                            <option value="partial">🔍 部分一致 (一括)</option>
+                            <option value="exact">🎯 完全一致 (一括)</option>
+                            <option value="prefix">🚀 文頭一致 (一括)</option>
                             <option value="after_comma">📌 「、」の後一致</option>
                             <option value="bracket">🏷️ 括弧内 [...]</option>
                         </select>
@@ -166,9 +170,9 @@
                     <button onclick="openBulkEditModal()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl border border-slate-700 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm">
                         ✏️ 選択中を一括編集
                     </button>
-                    <button onclick="startStudyMode('selected')" class="px-3.5 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 font-semibold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-sm">
+                    <button onclick="sendSelectedToStudyPool()" class="px-3.5 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 font-semibold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                        選択問題で暗記モード
+                        選択問題を暗記キューへ
                     </button>
                     <button onclick="exportSelectedToAnkiCsv()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl border border-slate-700 transition-all cursor-pointer shadow-sm">
                         Anki用TXT出力
@@ -186,10 +190,12 @@
         <!-- ==================== 【画面B】暗記モードビュー ==================== -->
         <div id="studyView" class="hidden space-y-6">
             <div class="bg-gradient-to-b from-slate-900 to-slate-950 border border-indigo-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl relative min-h-[460px] flex flex-col justify-between backdrop-blur-xl tournament-glow">
-                <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-4 text-xs text-slate-400">
-                    <div class="flex items-center gap-3">
-                        <span id="studyProgress" class="font-mono font-bold text-indigo-300 text-sm px-3 py-1 bg-indigo-950/80 border border-indigo-800/60 rounded-xl">STAGE 01 / 01</span>
+                <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-800 pb-4 mb-4 text-xs text-slate-400">
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <span id="studyProgress" class="font-mono font-bold text-indigo-300 text-sm px-3 py-1 bg-indigo-950/80 border border-indigo-800/60 rounded-xl">QUEUE: 0</span>
                         <span id="studySourceBadge" class="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded-lg text-slate-300 font-medium">問題集名</span>
+                        <span id="studyModeBadge" class="px-2.5 py-1 bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 rounded-lg text-[10px] font-mono">通常暗記</span>
+                        <span id="studyStreakBadge" class="px-2.5 py-1 bg-amber-500/10 text-amber-300 border border-amber-500/30 rounded-lg text-[10px] font-mono">習得度: 0 / 2</span>
                     </div>
                     <button onclick="switchMainMode('library')" class="text-slate-400 hover:text-slate-200 transition-colors underline cursor-pointer">ライブラリに戻る</button>
                 </div>
@@ -199,19 +205,23 @@
                 </div>
 
                 <div class="space-y-6 my-auto">
-                    <div id="studyQuestionText" class="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed text-center py-6 px-4">
-                        ここに問題文が表示されます
+                    <div id="studyQuestionText" class="text-xl sm:text-2xl font-bold text-slate-100 leading-relaxed text-center py-4 px-4">
+                        暗記キューに問題がありません。ライブラリから問題を選択して送り込んでください。
                     </div>
 
+                    <!-- 通常モード用解答ボックス -->
                     <div id="studyAnswerBox" class="hidden p-5 bg-slate-950/90 rounded-2xl border border-indigo-500/30 text-center space-y-3 shadow-inner">
                         <span class="text-[10px] text-indigo-400 font-mono font-bold uppercase tracking-widest block">TARGET ANSWER // 確定解答</span>
                         <div id="studyAnswerText" class="text-lg sm:text-xl font-bold text-indigo-200"></div>
                         <div id="studyMemoText" class="text-xs text-slate-400 pt-3 border-t border-slate-900 leading-relaxed"></div>
                     </div>
+
+                    <!-- 4択復習モード用選択肢エリア -->
+                    <div id="studyChoiceBox" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2"></div>
                 </div>
 
                 <div class="pt-6 border-t border-slate-800 mt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <button id="showAnswerBtn" onclick="revealStudyAnswer()" class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-sm rounded-2xl transition-all cursor-pointer shadow-lg shadow-indigo-600/30 active:scale-95 border border-indigo-400/40">
+                    <button id="showAnswerBtn" onclick="revealStudyAnswer()" class="hidden w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-sm rounded-2xl transition-all cursor-pointer shadow-lg shadow-indigo-600/30 active:scale-95 border border-indigo-400/40">
                         解答を見る
                     </button>
 
@@ -229,12 +239,11 @@
             <div id="studyCompleteBox" class="hidden text-center py-16 bg-slate-900 border border-indigo-500/30 rounded-3xl shadow-2xl space-y-5 backdrop-blur-xl tournament-glow">
                 <div class="w-16 h-16 bg-indigo-600/20 border border-indigo-500/40 rounded-3xl mx-auto flex items-center justify-center text-3xl shadow-inner">🏆</div>
                 <div class="space-y-1">
-                    <h2 class="text-xl font-black text-slate-100">ステージクリア：暗記セッション完了</h2>
-                    <p class="text-xs text-slate-400 font-mono" id="studyCompleteStats">お疲れ様でした。</p>
+                    <h2 class="text-xl font-black text-slate-100">キュー内の全問題を習得（卒業）しました！</h2>
+                    <p class="text-xs text-slate-400 font-mono" id="studyCompleteStats">お疲れ様でした。元データはライブラリに保持されています。</p>
                 </div>
                 <div class="pt-4 flex justify-center gap-3">
-                    <button onclick="restartStudy()" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-lg shadow-indigo-600/25 border border-indigo-400/30">もう一度やり直す</button>
-                    <button onclick="switchMainMode('library')" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition-all cursor-pointer">ライブラリに戻る</button>
+                    <button onclick="switchMainMode('library')" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-lg shadow-indigo-600/25 border border-indigo-400/30">ライブラリに戻る</button>
                 </div>
             </div>
         </div>
@@ -249,7 +258,7 @@
 
     <!-- フッター -->
     <footer class="max-w-4xl mx-auto px-4 py-8 w-full text-center border-t border-slate-900 mt-16 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
-        <span class="font-mono">My Quiz Library — Tournament Edition v1.0</span>
+        <span class="font-mono">My Quiz Library — Tournament Edition v2.1</span>
         <button onclick="resetAllData()" class="text-slate-500 hover:text-rose-400 transition-colors underline cursor-pointer">【試験運用中】全データをリセット</button>
     </footer>
 
@@ -277,7 +286,6 @@
                 </div>
             </div>
 
-            <!-- タブ1: 手動追加 -->
             <div id="tabManualContent" class="space-y-4">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-300 mb-1.5">📚 問題集名 <span class="text-rose-400">*必須</span></label>
@@ -302,7 +310,6 @@
                 <button onclick="addSingleQuestion()" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold rounded-xl text-xs transition-all cursor-pointer shadow-lg shadow-indigo-600/25 mt-2 active:scale-95 border border-indigo-400/30">この問題を追加する</button>
             </div>
 
-            <!-- タブ2: 一括プレビュー -->
             <div id="tabFileContent" class="space-y-4 hidden">
                 <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800">
                     <label class="block text-xs font-bold text-slate-300 mb-2">📁 テキスト / CSV ファイルを選択</label>
@@ -393,7 +400,8 @@
 
     <script>
         const AVAILABLE_GENRES = ["短文基本", "短文", "長文難問", "学生系", "ユニーク", "カルト", "早押し", "ペーパー", "敗者復活", "その他"];
-        
+        const MASTERY_STREAK_TARGET = 2; // 連続正解2回で習得（卒業）
+
         function loadQuestionsFromStorage() {
             try {
                 const parsed = JSON.parse(localStorage.getItem('quiz_questions') || '[]');
@@ -414,7 +422,33 @@
             }
         }
 
+        function loadStudyPoolFromStorage() {
+            try {
+                const parsed = JSON.parse(localStorage.getItem('quiz_study_pool') || '[]');
+                if (!Array.isArray(parsed)) return [];
+                return parsed.filter(item => item && Number.isFinite(Number(item.id))).map(item => ({
+                    id: Number(item.id),
+                    streak: Number.isFinite(Number(item.streak)) ? Number(item.streak) : 0,
+                    isReview: !!item.isReview
+                }));
+            } catch {
+                return [];
+            }
+        }
+
+        function saveStudyPoolToStorage() {
+            try {
+                localStorage.setItem('quiz_study_pool', JSON.stringify(studyPool));
+            } catch (error) {
+                console.warn('暗記キューの保存に失敗しました:', error);
+            }
+        }
+
         let questions = loadQuestionsFromStorage();
+        // 暗記キュー（習得するとここから消える。元の questions は残る）
+        let studyPool = loadStudyPoolFromStorage();
+        let currentPoolIndex = 0;
+
         let hideAnswer = true;
         try {
             const savedHideAnswer = localStorage.getItem('quiz_hide_answer');
@@ -427,11 +461,6 @@
         let selectedIds = new Set();
         let pendingParsedQuestions = [];
         const randomOrderCache = new Map();
-
-        let studyQueue = [];
-        let studyOriginalQueue = [];
-        let currentStudyIndex = 0;
-        let studyStats = { again: 0, good: 0 };
 
         const searchInput = document.getElementById('searchInput');
         const searchModeSelect = document.getElementById('searchModeSelect');
@@ -448,6 +477,14 @@
 
         if (hideAnswerToggle) hideAnswerToggle.checked = hideAnswer;
 
+        function updateQueueBadges() {
+            const activeCount = studyPool.length;
+            const badge = document.getElementById('navQueueBadge');
+            const headerStatus = document.getElementById('poolStatusHeader');
+            if (badge) badge.textContent = activeCount;
+            if (headerStatus) headerStatus.textContent = `STUDY QUEUE: ${activeCount} ACTIVE`;
+        }
+
         document.getElementById('openImportModalBtn').addEventListener('click', () => {
             document.getElementById('manualSource').value = '';
             document.getElementById('defaultSourceInput').value = '';
@@ -455,7 +492,7 @@
         });
 
         function exportBackup() {
-            const backup = { app: 'My Quiz Library', version: 1, exportedAt: new Date().toISOString(), questions };
+            const backup = { app: 'My Quiz Library', version: 2, exportedAt: new Date().toISOString(), questions };
             const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -493,11 +530,14 @@
                     const restored = rows.map(normalizeBackupRecord).filter(Boolean);
                     if (!confirm(`${restored.length}件の問題を復元します。現在のデータは置き換えられます。続行しますか？`)) return;
                     questions = restored;
+                    studyPool = [];
+                    saveStudyPoolToStorage();
                     selectedIds.clear();
                     saveToStorage();
                     initGenres();
                     renderQuestions();
                     updateSelectedCount();
+                    updateQueueBadges();
                     alert('バックアップを復元しました。');
                 } catch (error) {
                     console.error(error);
@@ -548,13 +588,16 @@
         }
 
         window.resetAllData = function() {
-            if (confirm('【注意】登録されているすべての問題データが削除されます。本当にリセットしますか？')) {
+            if (confirm('【注意】登録されているすべての問題データと暗記キューが削除されます。本当にリセットしますか？')) {
                 localStorage.removeItem('quiz_questions');
+                localStorage.removeItem('quiz_study_pool');
                 questions = [];
+                studyPool = [];
                 selectedIds.clear();
                 initGenres();
                 renderQuestions();
                 updateSelectedCount();
+                updateQueueBadges();
                 alert('すべてのデータをリセットしました。');
             }
         };
@@ -580,7 +623,7 @@
             });
         }
 
-        function checkMatch(qGenres, text, query, mode) {
+        function checkMatch(text, query, mode) {
             if (!text) return false;
             const t = text.toLowerCase();
             const q = query.toLowerCase();
@@ -596,6 +639,7 @@
                     if (!bracketMatches) return false;
                     return bracketMatches.some(b => b.toLowerCase().includes(q));
                 case 'partial':
+                case 'all_fields':
                 default: return t.includes(q);
             }
         }
@@ -608,11 +652,23 @@
 
             let filtered = questions.filter(q => {
                 const genresArr = Array.isArray(q.genre) ? q.genre : (q.genre ? q.genre.split(',').map(s => s.trim()) : []);
-                const matchKeyword = !keyword || 
-                    checkMatch(genresArr, q.question, keyword, mode) ||
-                    checkMatch(genresArr, q.answer, keyword, mode) ||
-                    checkMatch(genresArr, q.source, keyword, mode) ||
-                    checkMatch(genresArr, q.memo || '', keyword, mode);
+                
+                let matchKeyword = true;
+                if (keyword) {
+                    if (mode === 'question_only') {
+                        matchKeyword = checkMatch(q.question, keyword, 'partial');
+                    } else if (mode === 'answer_only') {
+                        matchKeyword = checkMatch(q.answer, keyword, 'partial');
+                    } else if (mode === 'all_fields' || mode === 'partial') {
+                        matchKeyword = checkMatch(q.question, keyword, 'partial') ||
+                                       checkMatch(q.answer, keyword, 'partial') ||
+                                       checkMatch(q.source, keyword, 'partial') ||
+                                       checkMatch(q.memo || '', keyword, 'partial');
+                    } else {
+                        matchKeyword = checkMatch(q.question, keyword, mode) ||
+                                       checkMatch(q.answer, keyword, mode);
+                    }
+                }
                 
                 const matchGenre = !selectedGenre || genresArr.includes(selectedGenre);
                 return matchKeyword && matchGenre;
@@ -644,32 +700,39 @@
                 libView.classList.remove('hidden');
                 studyView.classList.add('hidden');
                 libBtn.className = "px-3.5 py-2 rounded-lg font-bold bg-indigo-600 text-white shadow-md shadow-indigo-600/25 transition-all cursor-pointer";
-                studyBtn.className = "px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer";
+                studyBtn.className = "px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5";
+                renderQuestions();
             } else {
                 libView.classList.add('hidden');
                 studyView.classList.remove('hidden');
-                studyBtn.className = "px-3.5 py-2 rounded-lg font-bold bg-indigo-600 text-white shadow-md shadow-indigo-600/25 transition-all cursor-pointer";
+                studyBtn.className = "px-3.5 py-2 rounded-lg font-bold bg-indigo-600 text-white shadow-md shadow-indigo-600/25 transition-all cursor-pointer flex items-center gap-1.5";
                 libBtn.className = "px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer";
+                currentPoolIndex = 0;
+                renderStudyCard();
             }
         };
 
-        window.startStudyMode = function(type) {
-            let targets = [];
-            if (type === 'selected') {
-                if (selectedIds.size === 0) {
-                    alert('暗記モードに持ち込む問題が選択されていません。');
-                    return;
-                }
-                targets = questions.filter(q => selectedIds.has(q.id));
+        // 選択問題を暗記キューに追加する（重複はstreakリセットまたは維持して追加）
+        window.sendSelectedToStudyPool = function() {
+            if (selectedIds.size === 0) {
+                alert('暗記キューに送る問題が選択されていません。');
+                return;
             }
+            let addedCount = 0;
+            selectedIds.forEach(id => {
+                const exists = studyPool.some(item => item.id === id);
+                if (!exists) {
+                    studyPool.push({ id, streak: 0, isReview: false });
+                    addedCount++;
+                }
+            });
+            saveStudyPoolToStorage();
+            updateQueueBadges();
+            renderQuestions();
 
-            studyOriginalQueue = [...targets].sort(() => Math.random() - 0.5);
-            studyQueue = [...studyOriginalQueue];
-            currentStudyIndex = 0;
-            studyStats = { again: 0, good: 0 };
-
-            switchMainMode('study');
-            renderStudyCard();
+            if (confirm(`${addedCount}件の問題を暗記キューに送りました（既にキューにある問題は除外されました）。今すぐ暗記モードに移動しますか？`)) {
+                switchMainMode('study');
+            }
         };
 
         function renderStudyCard() {
@@ -677,44 +740,90 @@
             const aBox = document.getElementById('studyAnswerBox');
             const aText = document.getElementById('studyAnswerText');
             const mText = document.getElementById('studyMemoText');
+            const choiceBox = document.getElementById('studyChoiceBox');
             const progress = document.getElementById('studyProgress');
             const badge = document.getElementById('studySourceBadge');
+            const modeBadge = document.getElementById('studyModeBadge');
+            const streakBadge = document.getElementById('studyStreakBadge');
             const showBtn = document.getElementById('showAnswerBtn');
             const ratingBtns = document.getElementById('studyRatingButtons');
             const completeBox = document.getElementById('studyCompleteBox');
             const studyMainCard = document.querySelector('#studyView > div');
 
-            if (currentStudyIndex >= studyQueue.length) {
+            updateQueueBadges();
+
+            // キューが空になったら完了（卒業）画面へ
+            if (studyPool.length === 0) {
                 studyMainCard.classList.add('hidden');
                 completeBox.classList.remove('hidden');
                 const progressBar = document.getElementById('studyProgressBar');
                 if (progressBar) progressBar.style.width = '100%';
-                document.getElementById('studyCompleteStats').textContent =
-                    `TARGET: ${studyOriginalQueue.length}Q / GOOD: ${studyStats.good} / AGAIN: ${studyStats.again}`;
                 return;
             }
 
             studyMainCard.classList.remove('hidden');
             completeBox.classList.add('hidden');
 
-            const q = studyQueue[currentStudyIndex];
-            progress.textContent = `STAGE ${String(currentStudyIndex + 1).padStart(2, '0')} / ${String(studyQueue.length).padStart(2, '0')}`;
+            if (currentPoolIndex >= studyPool.length) {
+                currentPoolIndex = 0;
+            }
+
+            const poolItem = studyPool[currentPoolIndex];
+            const q = questions.find(item => item.id === poolItem.id);
+            if (!q) {
+                studyPool.splice(currentPoolIndex, 1);
+                saveStudyPoolToStorage();
+                renderStudyCard();
+                return;
+            }
+
+            progress.textContent = `REMAINING: ${studyPool.length}Q`;
+            streakBadge.textContent = `習得度: ${poolItem.streak} / ${MASTERY_STREAK_TARGET}`;
             const progressBar = document.getElementById('studyProgressBar');
             if (progressBar) {
-                const percent = studyQueue.length ? (currentStudyIndex / studyQueue.length) * 100 : 0;
+                const percent = Math.min(100, (poolItem.streak / MASTERY_STREAK_TARGET) * 100);
                 progressBar.style.width = `${percent}%`;
             }
             badge.textContent = q.source;
             qBox.textContent = q.question;
-            
-            aText.textContent = q.answer;
-            mText.textContent = q.memo ? `解説/メモ: ${q.memo}` : '';
-            if (q.memo) mText.classList.remove('hidden');
-            else mText.classList.add('hidden');
 
-            aBox.classList.add('hidden');
-            showBtn.classList.remove('hidden');
-            ratingBtns.classList.add('hidden');
+            if (poolItem.isReview) {
+                modeBadge.textContent = "🔁 4択復習モード";
+                modeBadge.className = "px-2.5 py-1 bg-rose-600/30 text-rose-300 border border-rose-500/40 rounded-lg text-[10px] font-mono";
+                
+                aBox.classList.add('hidden');
+                showBtn.classList.add('hidden');
+                ratingBtns.classList.add('hidden');
+                choiceBox.classList.remove('hidden');
+
+                let otherAnswers = questions.filter(item => item.answer !== q.answer).map(item => item.answer);
+                if (otherAnswers.length < 3) {
+                    otherAnswers.push("選択肢A", "選択肢B", "選択肢C");
+                }
+                otherAnswers.sort(() => Math.random() - 0.5);
+                const distractors = otherAnswers.slice(0, 3);
+                const choices = [q.answer, ...distractors].sort(() => Math.random() - 0.5);
+
+                choiceBox.innerHTML = choices.map(choice => `
+                    <button onclick="handleChoiceAnswer('${escapeAttr(choice)}', '${escapeAttr(q.answer)}')" class="p-3.5 bg-slate-950 hover:bg-indigo-950/60 border border-slate-800 hover:border-indigo-500/50 rounded-xl text-slate-200 text-sm font-semibold transition-all text-left shadow-sm cursor-pointer flex items-center justify-between group">
+                        <span>${escapeHtml(choice)}</span>
+                        <span class="text-xs text-slate-600 group-hover:text-indigo-400 font-mono">SELECT</span>
+                    </button>
+                `).join('');
+            } else {
+                modeBadge.textContent = "通常暗記";
+                modeBadge.className = "px-2.5 py-1 bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 rounded-lg text-[10px] font-mono";
+                
+                aText.textContent = q.answer;
+                mText.textContent = q.memo ? `解説/メモ: ${q.memo}` : '';
+                if (q.memo) mText.classList.remove('hidden');
+                else mText.classList.add('hidden');
+
+                aBox.classList.add('hidden');
+                choiceBox.classList.add('hidden');
+                showBtn.classList.remove('hidden');
+                ratingBtns.classList.add('hidden');
+            }
         }
 
         window.revealStudyAnswer = function() {
@@ -723,27 +832,54 @@
             document.getElementById('studyRatingButtons').classList.remove('hidden');
         };
 
-        window.rateCard = function(rating) {
-            if (rating === 'again') {
-                studyStats.again++;
-                studyQueue.push(studyQueue[currentStudyIndex]);
+        function handleCorrectAnswer(poolItem) {
+            poolItem.streak += 1;
+            poolItem.isReview = false;
+
+            if (poolItem.streak >= MASTERY_STREAK_TARGET) {
+                // 習得（卒業）とみなし、暗記キューから消去（元のライブラリデータは維持）
+                studyPool.splice(currentPoolIndex, 1);
+                alert('🎉 習得判定クリア！この問題は暗記キューから卒業しました（ライブラリには残っています）。');
             } else {
-                studyStats.good++;
+                // まだ習得基準に達していないのでキューの後ろへ回す
+                const [moved] = studyPool.splice(currentPoolIndex, 1);
+                studyPool.push(moved);
             }
-            currentStudyIndex++;
+            saveStudyPoolToStorage();
             renderStudyCard();
+        }
+
+        function handleIncorrectAnswer(poolItem) {
+            poolItem.streak = 0;
+            poolItem.isReview = true; // 次回は4択復習モードで出題
+            const [moved] = studyPool.splice(currentPoolIndex, 1);
+            // 少し後に復習できるようキューの後ろへ配置
+            studyPool.push(moved);
+            saveStudyPoolToStorage();
+            renderStudyCard();
+        }
+
+        window.rateCard = function(rating) {
+            const poolItem = studyPool[currentPoolIndex];
+            if (!poolItem) return;
+            if (rating === 'again') {
+                handleIncorrectAnswer(poolItem);
+            } else {
+                handleCorrectAnswer(poolItem);
+            }
         };
 
-        window.restartStudy = function() {
-            if (!studyOriginalQueue.length) {
-                switchMainMode('library');
-                return;
+        window.handleChoiceAnswer = function(selected, correct) {
+            const poolItem = studyPool[currentPoolIndex];
+            if (!poolItem) return;
+
+            if (selected === correct) {
+                alert('4択復習正解！習得度が上がりました。');
+                handleCorrectAnswer(poolItem);
+            } else {
+                alert(`不正解…正解は「${correct}」でした。習得度をリセットして再出題します。`);
+                handleIncorrectAnswer(poolItem);
             }
-            studyQueue = [...studyOriginalQueue];
-            currentStudyIndex = 0;
-            studyStats = { again: 0, good: 0 };
-            switchMainMode('study');
-            renderStudyCard();
         };
 
         window.switchViewMode = function(mode) {
@@ -808,6 +944,7 @@
 
         function renderCard(q) {
             const isChecked = selectedIds.has(q.id);
+            const inQueue = studyPool.some(item => item.id === q.id);
             const genresArr = Array.isArray(q.genre) ? q.genre : (q.genre ? q.genre.split(',').map(s => s.trim()) : ['未分類']);
             
             return `
@@ -815,6 +952,7 @@
                     <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                         <div class="flex items-center gap-2.5 flex-wrap">
                             <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelect(${q.id})" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            ${inQueue ? `<span class="px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-mono font-bold rounded-md">⚡ 暗記キュー中</span>` : ''}
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 ${genresArr.map(g => `<span class="px-2.5 py-0.5 bg-indigo-950/80 text-indigo-300 border border-indigo-800/50 text-[11px] font-semibold rounded-lg shadow-inner">${escapeHtml(g)}</span>`).join('')}
                             </div>
@@ -940,6 +1078,10 @@
             })[char]);
         }
 
+        function escapeAttr(value) {
+            return String(value ?? '').replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+        }
+
         window.copyToClipboard = function(id) {
             const q = questions.find(item => item.id === id);
             if (!q) return;
@@ -953,11 +1095,14 @@
         window.deleteQuestion = function(id) {
             if (confirm('この問題を削除しますか？')) {
                 questions = questions.filter(q => q.id !== id);
+                studyPool = studyPool.filter(item => item.id !== id);
+                saveStudyPoolToStorage();
                 selectedIds.delete(id);
                 saveToStorage();
                 initGenres();
                 renderQuestions();
                 updateSelectedCount();
+                updateQueueBadges();
             }
         };
 
@@ -1308,7 +1453,7 @@
 
         clearBtn.addEventListener('click', () => {
             searchInput.value = '';
-            searchModeSelect.value = 'partial';
+            searchModeSelect.value = 'all_fields';
             genreFilter.value = '';
             sortOrderSelect.value = 'default';
             currentPage = 1;
@@ -1318,6 +1463,7 @@
         initGenres();
         renderQuestions();
         updateSelectedCount();
+        updateQueueBadges();
     </script>
 </body>
 </html>
