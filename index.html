@@ -35,7 +35,202 @@
             box-shadow: 0 0 25px rgba(99, 102, 241, 0.15), inset 0 0 15px rgba(99, 102, 241, 0.05);
         }
     </style>
-</head>
+
+    <style id="game-ui-upgrade">
+        :root {
+            color-scheme: dark;
+            --game-bg: #050711;
+            --game-panel: rgba(12, 19, 38, .88);
+            --game-line: rgba(91, 220, 255, .22);
+            --game-cyan: #67e8f9;
+            --game-violet: #a78bfa;
+            --game-glow: 0 0 28px rgba(34, 211, 238, .13), 0 0 58px rgba(139, 92, 246, .08);
+        }
+
+        body {
+            background:
+                radial-gradient(ellipse at 12% 4%, rgba(37, 99, 235, .19), transparent 34rem),
+                radial-gradient(ellipse at 92% 18%, rgba(124, 58, 237, .16), transparent 32rem),
+                linear-gradient(rgba(5, 9, 22, .94), rgba(5, 7, 17, .98)),
+                var(--game-bg) !important;
+            background-attachment: fixed !important;
+            letter-spacing: .012em;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            opacity: .24;
+            background-image:
+                linear-gradient(rgba(103, 232, 249, .055) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(103, 232, 249, .055) 1px, transparent 1px);
+            background-size: 42px 42px;
+            mask-image: linear-gradient(to bottom, black, transparent 88%);
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 20;
+            pointer-events: none;
+            opacity: .12;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0,
+                transparent 3px,
+                rgba(148, 163, 184, .08) 4px
+            );
+        }
+
+        ::selection { background: rgba(34, 211, 238, .35) !important; color: white; }
+
+        header {
+            border-color: rgba(103, 232, 249, .24) !important;
+            padding-top: 1rem;
+        }
+        header h1 { text-shadow: 0 0 24px rgba(103, 232, 249, .22); }
+        header h1 > span:first-child {
+            color: var(--game-cyan) !important;
+            background: linear-gradient(145deg, rgba(8, 145, 178, .25), rgba(109, 40, 217, .2)) !important;
+            border-color: rgba(103, 232, 249, .45) !important;
+            box-shadow: 0 0 22px rgba(34, 211, 238, .16), inset 0 0 12px rgba(103, 232, 249, .12);
+        }
+
+        .tournament-glow {
+            border-color: rgba(103, 232, 249, .27) !important;
+            box-shadow: var(--game-glow), inset 0 0 24px rgba(103, 232, 249, .025) !important;
+        }
+
+        #libraryView > div,
+        #studyView > div,
+        #emptyState,
+        footer {
+            backdrop-filter: blur(16px);
+        }
+
+        #libraryView > div:first-child {
+            background: linear-gradient(135deg, rgba(13, 24, 48, .96), rgba(9, 14, 29, .94)) !important;
+            border-color: rgba(103, 232, 249, .24) !important;
+        }
+
+        #studyView > div:first-child {
+            background:
+                radial-gradient(ellipse at 50% 0%, rgba(34, 211, 238, .10), transparent 55%),
+                linear-gradient(145deg, rgba(15, 23, 42, .98), rgba(5, 9, 22, .98)) !important;
+            border-color: rgba(103, 232, 249, .38) !important;
+            box-shadow: 0 0 50px rgba(34, 211, 238, .10), 0 0 100px rgba(124, 58, 237, .08), inset 0 0 40px rgba(103, 232, 249, .035) !important;
+        }
+
+        button {
+            transition: transform .18s ease, box-shadow .2s ease, border-color .2s ease, background-color .2s ease, color .2s ease !important;
+        }
+        button:not(:disabled):hover {
+            transform: translateY(-2px);
+            filter: brightness(1.12);
+        }
+        button:not(:disabled):active { transform: translateY(0) scale(.975); }
+        button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+            outline: 2px solid var(--game-cyan) !important;
+            outline-offset: 3px !important;
+            box-shadow: 0 0 0 5px rgba(34, 211, 238, .12) !important;
+        }
+
+        input, select, textarea {
+            border-color: rgba(100, 116, 139, .42) !important;
+            background-color: rgba(3, 8, 22, .78) !important;
+        }
+        input:hover, select:hover, textarea:hover {
+            border-color: rgba(103, 232, 249, .45) !important;
+        }
+
+        #mainDisplayArea > *,
+        #mainDisplayArea [class*="rounded-"] {
+            transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+        }
+        #mainDisplayArea > div,
+        #mainDisplayArea article {
+            border-color: rgba(71, 85, 105, .62);
+        }
+        #mainDisplayArea > div:hover,
+        #mainDisplayArea article:hover {
+            border-color: rgba(103, 232, 249, .42) !important;
+            box-shadow: 0 8px 30px rgba(2, 8, 23, .35), 0 0 24px rgba(34, 211, 238, .07);
+        }
+
+        #studyQuestionText {
+            text-shadow: 0 0 30px rgba(103, 232, 249, .12);
+            letter-spacing: .025em;
+        }
+        #studyAnswerBox {
+            background: linear-gradient(145deg, rgba(8, 47, 73, .35), rgba(30, 27, 75, .42)) !important;
+            border-color: rgba(103, 232, 249, .42) !important;
+            box-shadow: inset 0 0 24px rgba(34, 211, 238, .055), 0 0 28px rgba(34, 211, 238, .08) !important;
+        }
+        #studyProgressBar {
+            background: linear-gradient(90deg, #22d3ee, #6366f1 55%, #a78bfa) !important;
+            box-shadow: 0 0 14px rgba(34, 211, 238, .55) !important;
+        }
+
+        #modeLibraryBtn, #modeStudyBtn,
+        #viewModeList, #viewModeGroupSource, #viewModeGroupGenre {
+            letter-spacing: .025em;
+        }
+
+        footer { border-color: rgba(103, 232, 249, .13) !important; }
+
+        ::-webkit-scrollbar-track { background: #050711; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(#0891b2, #6d28d9);
+            border: 2px solid #050711;
+            border-radius: 99px;
+        }
+
+        @keyframes game-entry {
+            from { opacity: 0; transform: translateY(9px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #libraryView, #studyView { animation: game-entry .35s ease both; }
+
+        @media (max-width: 640px) {
+            body::before { background-size: 30px 30px; }
+            header { align-items: stretch !important; }
+            #studyView > div:first-child { min-height: 420px; padding: 1.15rem !important; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
+
+    <style id="sort-mode-styles">
+        #sortView > div { backdrop-filter: blur(18px); }
+        #sortCard { box-shadow: inset 0 0 32px rgba(34,211,238,.035), 0 12px 40px rgba(0,0,0,.25); }
+        #sortActions:not(.hidden) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        #sortActions button { transition: transform .18s ease, box-shadow .2s ease, background .2s ease; }
+        #sortActions button:hover { transform: translateY(-2px); box-shadow: 0 0 24px rgba(34,211,238,.12); }
+    </style>
+
+    <style id="mastery-first-design">
+        #masteryDashboard { position: relative; overflow: hidden; }
+        #masteryDashboard::after {
+            content: ""; position: absolute; inset: 0 auto 0 0; width: 3px;
+            background: linear-gradient(180deg, #67e8f9, #818cf8);
+            box-shadow: 0 0 18px rgba(34,211,238,.55);
+        }
+        #masteredQuestionCount { text-shadow: 0 0 22px rgba(103,232,249,.22); }
+        @media (prefers-reduced-motion: no-preference) {
+            #masteredQuestionCount { transition: color .2s ease, text-shadow .2s ease; }
+        }
+    </style>
+\n</head>
 <body class="bg-[#070a13] text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white flex flex-col justify-between antialiased">
 
     <div class="max-w-4xl mx-auto px-4 py-8 w-full">
@@ -45,7 +240,7 @@
                 <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
                 SYSTEM ACTIVE // TOURNAMENT MODE
             </span>
-            <span id="poolStatusHeader" class="text-slate-400">STUDY QUEUE: 0 ACTIVE</span>
+            <span id="poolStatusHeader" class="text-slate-400">FOCUS: MASTER WHAT YOU DON'T KNOW</span>
         </div>
 
         <!-- ヘッダー -->
@@ -64,8 +259,8 @@
                     <button id="modeLibraryBtn" onclick="switchMainMode('library')" class="px-3.5 py-2 rounded-lg font-bold bg-indigo-600 text-white shadow-md shadow-indigo-600/25 transition-all cursor-pointer">📚 ライブラリ</button>
                     <button id="modeStudyBtn" onclick="switchMainMode('study')" class="px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5">
                         ⚡ 暗記モード
-                        <span id="navQueueBadge" class="px-1.5 py-0.2 bg-indigo-950 text-indigo-300 border border-indigo-700/50 rounded-md font-mono text-[10px]">0</span>
                     </button>
+                    <button id="modeSortBtn" onclick="switchMainMode('sort')" class="px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer">🎯 仕分け</button>
                 </div>
 
                 <div class="flex items-center gap-2">
@@ -79,6 +274,23 @@
                 </button>
             </div>
         </header>
+
+        <!-- 習得数を主役にしたダッシュボード -->
+        <section id="masteryDashboard" class="mb-6 rounded-2xl border border-cyan-400/25 bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950/70 p-4 sm:p-5 shadow-[0_12px_40px_rgba(8,145,178,0.10)]">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <p class="text-[10px] font-mono tracking-[.24em] text-cyan-300">MASTERY RECORD // YOUR KNOWLEDGE</p>
+                    <p class="text-xs text-slate-400 mt-1">覚えた問題は、ひとつずつ確かな成果として積み上がる。</p>
+                </div>
+                <div class="text-right">
+                    <div class="flex items-baseline justify-end gap-2">
+                        <span id="masteredQuestionCount" class="text-4xl sm:text-5xl leading-none font-black font-mono text-white tabular-nums">0</span>
+                        <span class="text-sm font-bold text-cyan-200">問 習得</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-1">習得した問題の累計数</p>
+                </div>
+            </div>
+        </section>
 
         <!-- ==================== 【画面A】ライブラリビュー ==================== -->
         <div id="libraryView" class="space-y-4">
@@ -201,16 +413,12 @@
             <div class="bg-gradient-to-b from-slate-900 to-slate-950 border border-indigo-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl relative min-h-[460px] flex flex-col justify-between backdrop-blur-xl tournament-glow">
                 <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-800 pb-4 mb-4 text-xs text-slate-400">
                     <div class="flex items-center gap-2.5 flex-wrap">
-                        <span id="studyProgress" class="font-mono font-bold text-indigo-300 text-sm px-3 py-1 bg-indigo-950/80 border border-indigo-800/60 rounded-xl">QUEUE: 0</span>
+                        <span id="studyProgress" class="font-mono font-bold text-cyan-200 text-sm px-3 py-1 bg-cyan-950/50 border border-cyan-800/60 rounded-xl">MASTERY FOCUS</span>
                         <span id="studySourceBadge" class="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded-lg text-slate-300 font-medium">問題集名</span>
                         <span id="studyModeBadge" class="px-2.5 py-1 bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 rounded-lg text-[10px] font-mono">通常暗記</span>
-                        <span id="studyStreakBadge" class="px-2.5 py-1 bg-amber-500/10 text-amber-300 border border-amber-500/30 rounded-lg text-[10px] font-mono">習得度: 0 / 2</span>
+                        <span id="studyStreakBadge" class="px-2.5 py-1 bg-amber-500/10 text-amber-300 border border-amber-500/30 rounded-lg text-[10px] font-mono">定着確認: 0 / 2</span>
                     </div>
                     <button onclick="switchMainMode('library')" class="text-slate-400 hover:text-slate-200 transition-colors underline cursor-pointer">ライブラリに戻る</button>
-                </div>
-
-                <div class="h-2 bg-slate-950 rounded-full overflow-hidden mb-6 border border-slate-800 shadow-inner" aria-label="学習進捗">
-                    <div id="studyProgressBar" class="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(99,102,241,0.5)]" style="width: 0%"></div>
                 </div>
 
                 <div class="space-y-6 my-auto">
@@ -260,6 +468,47 @@
             <div class="text-3xl mb-2 text-slate-600">📭</div>
             <p class="text-slate-400 text-sm font-medium">条件に一致する問題が見つかりませんでした。</p>
             <p class="text-slate-500 text-xs mt-1">「問題を追加」からデータを新規登録してください。</p>
+        </div>
+    </div>
+
+    <!-- ==================== 【画面C】仕分けビュー ==================== -->
+    <div id="sortView" class="hidden max-w-3xl mx-auto space-y-5">
+        <div class="rounded-3xl border border-cyan-400/30 bg-slate-950/80 p-5 sm:p-8 tournament-glow">
+            <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
+                <div>
+                    <p class="text-[10px] font-mono tracking-[.25em] text-cyan-300">KNOWLEDGE SCANNER</p>
+                    <h2 class="text-2xl font-black text-white mt-1">🎯 理解度チェック</h2>
+                    <p class="text-xs text-slate-400 mt-2">問題を見て、答えを思い出せるか判定。数字を追うより、覚えた問題を増やそう。</p>
+                </div>
+                <button onclick="startSortSession()" class="px-3 py-2 rounded-xl text-xs font-bold border border-cyan-400/30 bg-cyan-950/50 text-cyan-200 hover:bg-cyan-900/60">最初からやり直す</button>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mb-5 text-center">
+                <div class="rounded-xl bg-emerald-950/30 border border-emerald-500/20 p-3"><div id="sortKnown" class="text-xl font-black text-emerald-300 font-mono">0</div><div class="text-[10px] text-slate-500">今回、習得済みにした数</div></div>
+                <div class="rounded-xl bg-rose-950/30 border border-rose-500/20 p-3"><div id="sortUnknown" class="text-xl font-black text-rose-300 font-mono">0</div><div class="text-[10px] text-slate-500">暗記モードへ送った数</div></div>
+            </div>
+            <div id="sortCard" class="rounded-2xl border border-cyan-400/20 bg-slate-900/80 p-5 sm:p-8 min-h-[230px] flex flex-col justify-center">
+                <div class="flex justify-between items-center gap-3 mb-5"><span id="sortSource" class="text-[10px] text-cyan-300 font-mono truncate"></span><span id="sortCounter" class="hidden"></span></div>
+                <p id="sortQuestion" class="text-lg sm:text-2xl font-bold leading-relaxed text-white text-center whitespace-pre-wrap"></p>
+                <div id="sortAnswerBox" class="hidden mt-6 p-4 rounded-xl bg-cyan-950/30 border border-cyan-400/20">
+                    <p class="text-[10px] text-cyan-300 font-mono mb-2">ANSWER</p>
+                    <p id="sortAnswer" class="text-base font-bold text-cyan-100 whitespace-pre-wrap"></p>
+                    <p id="sortMemo" class="text-xs text-slate-400 mt-3 whitespace-pre-wrap"></p>
+                </div>
+                <button id="sortRevealBtn" onclick="revealSortAnswer()" class="mx-auto mt-6 px-5 py-2.5 rounded-xl border border-cyan-400/30 bg-cyan-950/50 text-cyan-200 text-xs font-bold">答えを確認する</button>
+                <div id="sortActions" class="hidden gap-3 mt-6">
+                    <button onclick="classifyCurrentQuestion('known')" class="py-4 rounded-xl bg-emerald-600/20 border border-emerald-400/40 text-emerald-200 font-black text-sm hover:bg-emerald-600/30">✓ 知ってる</button>
+                    <button onclick="classifyCurrentQuestion('unknown')" class="py-4 rounded-xl bg-rose-600/20 border border-rose-400/40 text-rose-200 font-black text-sm hover:bg-rose-600/30">＋ 知らない → 暗記へ</button>
+                </div>
+            </div>
+            <div id="sortComplete" class="hidden text-center py-12">
+                <div class="text-4xl mb-3">🏁</div>
+                <h3 class="text-2xl font-black text-white">仕分け完了！</h3>
+                <p class="text-sm text-slate-400 mt-2">知らない問題は暗記モードに追加されました。</p>
+                <div class="flex flex-wrap justify-center gap-3 mt-6">
+                    <button onclick="switchMainMode('study')" class="px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-violet-600 text-white font-bold text-sm">⚡ 暗記モードへ進む</button>
+                    <button onclick="switchMainMode('library')" class="px-5 py-3 rounded-xl border border-slate-700 text-slate-300 font-bold text-sm">ライブラリへ戻る</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -520,9 +769,57 @@
             }
         }
 
+        function loadKnowledgeStatus() {
+            try {
+                const parsed = JSON.parse(localStorage.getItem('quiz_knowledge_status') || '{}');
+                return parsed && typeof parsed === 'object' ? parsed : {};
+            } catch { return {}; }
+        }
+
+        function saveKnowledgeStatus() {
+            try { localStorage.setItem('quiz_knowledge_status', JSON.stringify(knowledgeStatus)); }
+            catch (e) { console.warn('理解度データの保存に失敗:', e); }
+        }
+
+        function loadMasteredQuestionIds() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('quiz_mastered_question_ids') || 'null');
+                if (Array.isArray(saved)) return new Set(saved.map(Number).filter(Number.isFinite));
+            } catch (e) {
+                console.warn('習得データの読み込みに失敗:', e);
+            }
+            // v2 で「知ってる」と判定した問題を習得済みとして引き継ぐ
+            return new Set(Object.entries(knowledgeStatus)
+                .filter(([, status]) => status === 'known')
+                .map(([id]) => Number(id))
+                .filter(Number.isFinite));
+        }
+
+        function saveMasteredQuestionIds() {
+            try {
+                localStorage.setItem('quiz_mastered_question_ids', JSON.stringify([...masteredQuestionIds]));
+            } catch (e) {
+                console.warn('習得データの保存に失敗:', e);
+            }
+        }
+
+        function updateMasteryDashboard() {
+            const existingIds = new Set(questions.map(q => q.id));
+            masteredQuestionIds = new Set([...masteredQuestionIds].filter(id => existingIds.has(id)));
+            saveMasteredQuestionIds();
+            const count = document.getElementById('masteredQuestionCount');
+            if (count) count.textContent = masteredQuestionIds.size.toLocaleString('ja-JP');
+        }
+
         let questions = loadQuestionsFromStorage();
         let sourceMetaMap = loadSourceMetaFromStorage();
         let studyPool = loadStudyPoolFromStorage();
+        let knowledgeStatus = loadKnowledgeStatus();
+        let masteredQuestionIds = loadMasteredQuestionIds();
+        let sortSession = [];
+        let sortIndex = 0;
+        let sortKnownCount = 0;
+        let sortUnknownCount = 0;
         let currentPoolIndex = 0;
 
         let openedSourceFolder = null;
@@ -573,10 +870,8 @@
 
         function updateQueueBadges() {
             const activeCount = studyPool.length;
-            const badge = document.getElementById('navQueueBadge');
             const headerStatus = document.getElementById('poolStatusHeader');
-            if (badge) badge.textContent = activeCount;
-            if (headerStatus) headerStatus.textContent = `STUDY QUEUE: ${activeCount} ACTIVE`;
+            if (headerStatus) headerStatus.textContent = "FOCUS: MASTER WHAT YOU DON'T KNOW";
         }
 
         document.getElementById('openImportModalBtn').addEventListener('click', () => {
@@ -595,7 +890,9 @@
                 version: 3,
                 exportedAt: new Date().toISOString(),
                 questions,
-                sourceMetaMap
+                sourceMetaMap,
+                knowledgeStatus,
+                masteredQuestionIds: [...masteredQuestionIds]
             };
             const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
             const url = URL.createObjectURL(blob);
@@ -640,6 +937,10 @@
                     }
                     studyPool = [];
                     saveStudyPoolToStorage();
+                    knowledgeStatus = parsed.knowledgeStatus && typeof parsed.knowledgeStatus === 'object' ? parsed.knowledgeStatus : {};
+                    masteredQuestionIds = new Set(Array.isArray(parsed.masteredQuestionIds) ? parsed.masteredQuestionIds.map(Number).filter(Number.isFinite) : []);
+                    saveKnowledgeStatus();
+                    saveMasteredQuestionIds();
                     selectedIds.clear();
                     openedSourceFolder = null;
                     saveToStorage();
@@ -647,6 +948,7 @@
                     renderQuestions();
                     updateSelectedCount();
                     updateQueueBadges();
+                    updateMasteryDashboard();
                     alert('バックアップを復元しました。');
                 } catch (error) {
                     console.error(error);
@@ -700,15 +1002,20 @@
                 localStorage.removeItem('quiz_questions');
                 localStorage.removeItem('quiz_source_meta');
                 localStorage.removeItem('quiz_study_pool');
+                localStorage.removeItem('quiz_knowledge_status');
+                localStorage.removeItem('quiz_mastered_question_ids');
                 questions = [];
                 sourceMetaMap = {};
                 studyPool = [];
+                knowledgeStatus = {};
+                masteredQuestionIds = new Set();
                 selectedIds.clear();
                 openedSourceFolder = null;
                 initGenres();
                 renderQuestions();
                 updateSelectedCount();
                 updateQueueBadges();
+                updateMasteryDashboard();
                 alert('すべてのデータをリセットしました。');
             }
         };
@@ -844,25 +1151,92 @@
         };
 
         window.switchMainMode = function(mode) {
-            const libView = document.getElementById('libraryView');
-            const studyView = document.getElementById('studyView');
-            const libBtn = document.getElementById('modeLibraryBtn');
-            const studyBtn = document.getElementById('modeStudyBtn');
-
-            if (mode === 'library') {
-                libView.classList.remove('hidden');
-                studyView.classList.add('hidden');
-                libBtn.className = "px-3.5 py-2 rounded-lg font-bold bg-indigo-600 text-white shadow-md shadow-indigo-600/25 transition-all cursor-pointer";
-                studyBtn.className = "px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5";
-                renderQuestions();
-            } else {
-                libView.classList.add('hidden');
-                studyView.classList.remove('hidden');
-                studyBtn.className = "px-3.5 py-2 rounded-lg font-bold bg-indigo-600 text-white shadow-md shadow-indigo-600/25 transition-all cursor-pointer flex items-center gap-1.5";
-                libBtn.className = "px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer";
-                currentPoolIndex = 0;
-                renderStudyCard();
+            const views = {
+                library: document.getElementById('libraryView'),
+                study: document.getElementById('studyView'),
+                sort: document.getElementById('sortView')
+            };
+            const buttons = {
+                library: document.getElementById('modeLibraryBtn'),
+                study: document.getElementById('modeStudyBtn'),
+                sort: document.getElementById('modeSortBtn')
+            };
+            Object.entries(views).forEach(([key, view]) => view.classList.toggle('hidden', key !== mode));
+            Object.entries(buttons).forEach(([key, btn]) => {
+                btn.className = key === mode
+                    ? "px-3.5 py-2 rounded-lg font-bold bg-cyan-700/80 text-white shadow-md shadow-cyan-600/20 transition-all cursor-pointer"
+                    : "px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-all cursor-pointer";
+            });
+            if (mode === 'library') renderQuestions();
+            if (mode === 'study') { currentPoolIndex = 0; renderStudyCard(); }
+            if (mode === 'sort') {
+                if (sortSession.length === 0 || sortIndex >= sortSession.length) startSortSession();
+                else renderSortCard();
             }
+        };
+
+        window.startSortSession = function() {
+            const candidates = getFilteredAndSortedQuestions();
+            sortSession = candidates.map(q => q.id);
+            sortIndex = 0;
+            sortKnownCount = 0;
+            sortUnknownCount = 0;
+            document.getElementById('sortComplete').classList.add('hidden');
+            document.getElementById('sortCard').classList.remove('hidden');
+            renderSortCard();
+        };
+
+        function renderSortCard() {
+            document.getElementById('sortKnown').textContent = sortKnownCount;
+            document.getElementById('sortUnknown').textContent = sortUnknownCount;
+
+            if (sortIndex >= sortSession.length) {
+                document.getElementById('sortCard').classList.add('hidden');
+                document.getElementById('sortComplete').classList.remove('hidden');
+                return;
+            }
+            const q = questions.find(item => item.id === sortSession[sortIndex]);
+            if (!q) { sortIndex++; renderSortCard(); return; }
+            document.getElementById('sortSource').textContent = q.source || '未分類';
+            document.getElementById('sortCounter').textContent = '';
+            document.getElementById('sortQuestion').textContent = q.question;
+            document.getElementById('sortAnswer').textContent = q.answer;
+            document.getElementById('sortMemo').textContent = q.memo ? `メモ：${q.memo}` : '';
+            document.getElementById('sortAnswerBox').classList.add('hidden');
+            document.getElementById('sortRevealBtn').classList.remove('hidden');
+            document.getElementById('sortActions').classList.add('hidden');
+        }
+
+        window.revealSortAnswer = function() {
+            document.getElementById('sortAnswerBox').classList.remove('hidden');
+            document.getElementById('sortRevealBtn').classList.add('hidden');
+            document.getElementById('sortActions').classList.remove('hidden');
+        };
+
+        window.classifyCurrentQuestion = function(status) {
+            const id = sortSession[sortIndex];
+            if (id == null) return;
+            knowledgeStatus[id] = status;
+            saveKnowledgeStatus();
+
+            if (status === 'known') {
+                if (!masteredQuestionIds.has(id)) sortKnownCount++;
+                masteredQuestionIds.add(id);
+                saveMasteredQuestionIds();
+                studyPool = studyPool.filter(item => item.id !== id);
+            } else {
+                sortUnknownCount++;
+                masteredQuestionIds.delete(id);
+                saveMasteredQuestionIds();
+                if (!studyPool.some(item => item.id === id)) {
+                    studyPool.push({ id, streak: 0, isReview: false });
+                }
+            }
+            saveStudyPoolToStorage();
+            updateQueueBadges();
+            updateMasteryDashboard();
+            sortIndex++;
+            renderSortCard();
         };
 
         window.sendSelectedToStudyPool = function() {
@@ -907,8 +1281,6 @@
             if (studyPool.length === 0) {
                 studyMainCard.classList.add('hidden');
                 completeBox.classList.remove('hidden');
-                const progressBar = document.getElementById('studyProgressBar');
-                if (progressBar) progressBar.style.width = '100%';
                 return;
             }
 
@@ -928,13 +1300,8 @@
                 return;
             }
 
-            progress.textContent = `REMAINING: ${studyPool.length}Q`;
-            streakBadge.textContent = `習得度: ${poolItem.streak} / ${MASTERY_STREAK_TARGET}`;
-            const progressBar = document.getElementById('studyProgressBar');
-            if (progressBar) {
-                const percent = Math.min(100, (poolItem.streak / MASTERY_STREAK_TARGET) * 100);
-                progressBar.style.width = `${percent}%`;
-            }
+            progress.textContent = 'MASTERY FOCUS';
+            streakBadge.textContent = `定着確認: ${poolItem.streak} / ${MASTERY_STREAK_TARGET}`;
             badge.textContent = q.source;
             qBox.textContent = q.question;
 
@@ -988,8 +1355,11 @@
             poolItem.isReview = false;
 
             if (poolItem.streak >= MASTERY_STREAK_TARGET) {
+                masteredQuestionIds.add(poolItem.id);
+                saveMasteredQuestionIds();
+                updateMasteryDashboard();
                 studyPool.splice(currentPoolIndex, 1);
-                alert('🎉 習得判定クリア！この問題は暗記キューから卒業しました（ライブラリには残っています）。');
+                alert('🎉 習得判定クリア！習得した問題数に加算しました。');
             } else {
                 const [moved] = studyPool.splice(currentPoolIndex, 1);
                 studyPool.push(moved);
@@ -1151,6 +1521,7 @@
         };
 
         function renderQuestions() {
+            updateMasteryDashboard();
             const filtered = getFilteredAndSortedQuestions();
             resultCount.textContent = `MATCHED: ${filtered.length} / ${questions.length}`;
 
@@ -1716,6 +2087,7 @@
         renderQuestions();
         updateSelectedCount();
         updateQueueBadges();
+        updateMasteryDashboard();
     </script>
 </body>
 </html>
